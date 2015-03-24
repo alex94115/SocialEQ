@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<context:component-scan base-package="com.projectlaver" />
+
+	<batch:job-repository id="jobRepository" />
+
+	<import resource="classpath:/rodlaver-job-launcher-context.xml" />
+	<import resource="classpath:/jobs/rodLaverJob.xml" />
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="messages" />
+		<property name="alwaysUseMessageFormat" value="true" />
+	</bean>
+	
+	<!-- State Change Communication Beans -->
+	
+	<!--  Buyers -->
+	<bean id="buyerPendingUserRegistration" class="com.projectlaver.batch.communication.BuyerPendingUserRegistration" />
+	<bean id="buyerFailedInactiveSale" class="com.projectlaver.batch.communication.BuyerFailedInactiveSale" />
+	<bean id="buyerNonPhysicalPaymentCompleted" class="com.projectlaver.batch.communication.BuyerNonPhysicalPaymentCompleted" />
+	<bean id="buyerCampaignOptInCompleted" class="com.projectlaver.batch.communication.BuyerWonGiveaway" />
+	<bean id="buyerFailedSoldOut" class="com.projectlaver.batch.communication.BuyerFailedSoldOut" />
+	<bean id="BuyerFailedDuplicatePurchase" class="com.projectlaver.batch.communication.BuyerFailedDuplicatePurchase" />
+	<bean id="buyerPendingMeansOfPayment" class="com.projectlaver.batch.communication.BuyerPendingMeansOfPayment" />
+	<bean id="buyerPaymentPending" class="com.projectlaver.batch.communication.BuyerPaymentPending" />
+	<bean id="buyerPendingShipment" class="com.projectlaver.batch.communication.BuyerPendingShipment" />
+	<bean id="buyerPendingShippingAddress" class="com.projectlaver.batch.communication.BuyerPendingShippingAddress" />
+	<bean id="buyerPhysicalPurchaseShipped" class="com.projectlaver.batch.communication.BuyerPhysicalPurchaseShipped" />
+	<bean id="buyerPaymentFailed" class="com.projectlaver.batch.communication.BuyerPaymentFailed" />
+	<bean id="noCommunicationRequired" class="com.projectlaver.batch.communication.NoCommunicationRequired" />
+
+	<!-- Payment Provider -->
+	<bean id="paymentProvider" class="com.projectlaver.util.BraintreePaymentProvider"></bean>
+	
+	<!-- Braintree Gateway -->
+	<bean id="braintreeGateway" class="com.braintreegateway.BraintreeGateway">
+		<constructor-arg index="0" ref="braintreeEnvironment" />
+		<constructor-arg index="1" type="java.lang.String" value="${braintree.merchantId}" />
+		<constructor-arg index="2" type="java.lang.String" value="${braintree.publicKey}" />
+		<constructor-arg index="3" type="java.lang.String" value="${braintree.privateKey}" />
+	</bean>
+	
+	<util:constant id="braintreeEnvironment" static-field="${braintree.environment}" />
+
+</beans>

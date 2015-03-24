@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+<body>
+
+	<div tiles:fragment="body">
+	
+	  <div th:unless="${hasAcceptedCurrentBuyerTos}">
+	    <div class="col-xs-12 col-sm-8">
+			<h2 th:text="#{userHome.welcome}">Welcome to SocialEQ"</h2>
+		
+			<h5 th:text="#{userHome.accept.tos.headline}">To use SocialEQ, please accept our Terms of Service.</h5>
+			<form class="form-inline" id="termsOfServiceForm" action="acceptTermsOfService" method="POST">
+		      <fieldset>
+		        <!-- form content -->
+				<label for="acceptTermsOfService" class="checkbox">
+					<input type="checkbox" id="acceptTermsOfService" name="acceptTermsOfService" value="true" />I agree to the terms of service
+				</label> 
+				<input type="hidden" name="version" th:value="100"  />
+				<br/>
+				<button type="submit" class="btn btn-primary" id="submitAcceptTermsOfService">Submit</button>
+			  </fieldset>
+			</form>
+		</div>
+	  </div>
+		
+	  <div th:if="${hasAcceptedCurrentBuyerTos}">
+	  
+			<div th:if="${doesUserHavePendingPayment}">
+			  <div class="row" tiles:include="listing-detail-row">
+			    <!-- If the user has a pending purchase, include it here so that the user can go straight into checkout -->
+			  </div>
+			</div>
+			
+			<div th:if="${(not userHasActivePaypalPreapproval)}" th:unless="${doesUserHavePendingPayment}">
+			  <div class="col-xs-12 col-sm-8">
+			    <h4 th:text="#{userHome.welcome}">Welcome to SocialEQ"</h4>
+				<p>
+					SocialEQ works with musicians and local businesses to let you instantly 
+				    make purchases on social sites like Twitter and Facebook.
+				</p>
+				
+				<div class="panel-group" id="accordion">
+				  <div class="panel panel-default">
+				    <div class="panel-heading">
+				      <h4 class="panel-title">
+				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+				          How does it work?
+				        </a>
+				      </h4>
+				    </div>
+				    <div id="collapseOne" class="panel-collapse collapse">
+				      <div class="panel-body">
+						  <p>
+						    Unlike most sites that make you to click away from Twitter to another site, make you type in 
+						    your username and password or re-enter your contact and payment information, SocialEQ lets
+						    you make purchases and donations simply by writing a Tweet.
+						  </p>
+						  <p>
+							When you make your first purchase, you'll be given the option of saving your default payment
+							method so that in the future you can make a purchase just by writing a #hashtag.
+						  </p> 
+						  <p>
+						    When you make a purchase of digital goods, you'll get a link where you can view or 
+						    stream the files or download them to your computer or device. 
+						  </p>
+					  </div>
+					</div>
+					<div class="panel-heading">
+				      <h4 class="panel-title">
+				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+				          Is it secure?
+				        </a>
+				      </h4>
+				    </div>
+				    <div id="collapseTwo" class="panel-collapse collapse">
+				      <div class="panel-body">
+						<p>
+							SocialEQ uses industry-standard encryption to communicate with Twitter, 
+							Facebook and Braintree to keep all private information private.
+						</p>
+						<p>
+							We will only make a payment on your behalf when you write a tweet or 
+							comment that replies to an offer from one of our merchants / charities and repeat their #hashtag.
+						</p>
+						<p>
+							You also have all the protections of paying with a credit card, which means
+							that you're not responsible for charges that you didn't authorize. 
+						</p>
+						<p>
+							Finally, we are committed to working with you to make things right if you 
+							ever find a purchase on your account that you didn't authorize.
+						</p>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+				
+			  </div>
+			</div>
+
+			<div th:if="${(userHasActivePaypalPreapproval and isTwitterUser)}" th:unless="${doesUserHavePendingPayment}">
+			  <div class="col-xs-12 col-sm-8">
+			    <h4 th:text="#{userHome.welcome}">Welcome to SocialEQ"</h4>
+				<h5>Did you know?</h5>
+				<p>
+					SocialEQ works with brands and artists that you love to let you make purchases on Twitter by simply writing a tweet.
+				</p>
+				<p>
+					Here's an example:
+				</p>
+				<img src="#" style="width: 60%;" th:src="@{/resources/images/site/show-twitter-listing.png}" />
+				<p>
+					All you would need to do is write a tweet that says "@RuggieroGuitar #Buy" and SocialEQ will handle the rest.
+				</p>  
+			  </div>
+			</div>
+			
+			<div th:if="${userHasActivePaypalPreapproval and isFacebookUser}" th:unless="${doesUserHavePendingPayment}">
+			  <div class="col-xs-12 col-sm-8">
+			    <h4 th:text="#{userHome.welcome}">Welcome to SocialEQ"</h4>
+				<h5>Did you know?</h5>
+				<p>
+					SocialEQ works with brands and artist that you love to let you make purchases on Facebook by simply writing a comment.  
+				</p>
+				<p>
+					Here's an example:
+				    <img src="#" style="width: 60%;" th:src="@{/resources/images/site/make-facebook-sale.png}" />
+				</p>
+				<p>
+					All you would need to do is write a comment that says "#Buy" and SocialEQ will handle the rest.
+				</p>  
+				
+			  </div>
+			</div>
+			
+			<div th:if="${userHasActivePaypalPreapproval}" th:unless="${doesUserHavePendingPayment}">
+			  <div class="col-xs-12 col-sm-8">
+			    <div>
+				  <h5>Do you know a business or musician that wants to be able to sell in-stream on Twitter and Facebook?</h5>
+				  <p>
+					<a href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information.%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Contact us</a> to learn more.
+				  </p>
+			    </div>
+			  </div>
+			</div>
+				
+		</div>
+		
+		
+	</div><!--  body -->
+
+</body>
+</html>

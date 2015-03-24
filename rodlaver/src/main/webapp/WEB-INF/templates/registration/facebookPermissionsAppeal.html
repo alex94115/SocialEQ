@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+	
+	  <div id="registration-wrapper">
+				  
+	   <div class="row">
+	     <div class="col-sm-12">
+	       <div class="headline">
+	         <h1>We need certain permissions to let you sell direct to your fans on Facebook</h1>
+	         <h2>To automate the process of selling directly on your Facebook page, we need to be able to reply to prospective buyers.</h2>
+	       </div>
+	     </div>
+	   </div>
+	      
+	   <div class="row">
+	     <div class="col-sm-8">
+		
+		   <p>We need manage_pages and publish_actions or else this won't work.</p>
+		
+		   <form action="#" th:action="@{/connect/facebook}" method="post" >
+		     <fieldset>
+			   <input type="hidden" name="scope" value="manage_pages,publish_actions" />
+			   <button type="submit" class="btn btn-primary" text="Connect" id="connect">Grant Facebook Permissions</button>
+			 </fieldset>
+		   </form>
+		
+		   <p class="secondary-option">
+		     <a href="#" th:href="@{/registration/linkTwitter}">Skip Facebook and add Twitter instead.</a>
+		   </p>
+		   
+		   <div style="margin-top: 50px;">
+		     <p>
+		       Got questions? You can reach us at <a href="mailto:support@socialeq.co">support@socialeq.co</a>
+		     </p>
+		   </div>
+		   
+		 </div>
+	   </div>
+	   
+      </div>
+	</div>
+</html>

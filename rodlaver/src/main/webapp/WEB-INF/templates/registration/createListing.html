@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+	
+	  <div id="registration-wrapper">
+	    
+	    <script	src="#"	th:src="@{/resources/js/musician-first-listing.js}"></script>
+	    <script th:inline="javascript">
+	    /*<![CDATA[*/
+		    var hasNewListingFieldErrors = /*[[${hasNewListingFieldErrors}]]*/;
+		 	var hasNewListingUploadErrors = /*[[${hasNewListingUploadErrors}]]*/;  
+	    /*]]>*/
+	    </script>
+	    
+	   <div class="row">
+	     <div class="col-sm-12">
+	       <div class="headline">
+	         <h1>Sell Your Digital Album</h1>
+	         <h2>Describe your album so we can start selling it right away.</h2>
+	       </div>
+	     </div>
+	   </div>
+	      
+	   <div class="row">
+	     <div class="col-sm-8">
+	    
+			<form role="form"
+			    action="#" 
+		        th:action="@{/registration/firstListing(${_csrf.parameterName}=${_csrf.token})}" 
+		        method="post" 
+		        id="listingForm" 
+		        enctype="multipart/form-data" 
+		        th:object="${saleForm}"> 
+		    
+		      <input type="hidden" name="isRevenueCampaign" value="true" />
+		      <input type="hidden" name="isInstantGiveaway" value="false" />
+		      <input type="hidden" name="isFundraiser" value="false" />
+		      <input type="hidden" name="isFundraiserReward" value="false" />
+		      <input type="hidden" name="isPhysicalGood" value="false"  />
+		      <input type="hidden" name="isDigitalDownload" value="true" />
+		      <input type="hidden" name="isLimitedQuantity" value="false" />
+		      <input type="hidden" name="termsAndConditions" value="" />
+		      <input type="hidden" name="backgroundImageUrl" value="" />
+		      
+		      <div th:class="${#fields.hasErrors('title')} ? 'form-group has-error' : 'form-group'" id="titleDiv">
+				<label for="title">
+			    	<a href="#" id="listingTitlePopover" 
+			    	   th:attr="data-original-title=#{form.title.popover.title},data-content=#{form.title.popover.text}"
+			    	   th:text="#{musician.first.listing.form.title.label}">Title:</a>
+				</label>
+				<input type="text" 
+					   class="form-control" 
+					   name="title" 
+					   id="title" 
+					   th:value="${#object.title}"
+					   th:placeholder="#{musician.first.listing.form.title.placeholder}" /> 
+				<span th:if="${#fields.hasErrors('title')}" 
+					   class="help-block" 
+					   th:errors="*{title}">Invalid Title</span>
+			  </div>
+		      
+		      <div th:class="${#fields.hasErrors('price')} ? 'form-group has-error' : 'form-group'" id="priceDiv">
+				<label for="price">
+			    	<a href="#" id="listingPricePopover" 
+			    	   th:attr="data-original-title=#{musician.first.listing.form.price.popover.title},data-content=#{musician.first.listing.form.price.popover.text}"
+			    	   th:text="#{musician.first.listing.form.price.label}">Price:</a>
+				</label>
+				<div class="input-group">
+					<span class="input-group-addon">$</span>
+					<input type="text" 
+						   class="form-control" 
+						   name="price"
+						   id="price" 
+						   th:value="${#object.price}"
+						   th:placeholder="#{musician.first.listing.form.price.placeholder}" /> 
+				</div>
+				<span th:if="${#fields.hasErrors('price')}" class="help-block" th:errors="*{price}">Invalid Price</span>
+			  </div>
+			  
+			  <div th:class="${#fields.hasErrors('longDescription')} ? 'form-group has-error' : 'form-group'">
+				<label for="longDescription">
+			    	<a href="#" id="listinglongDescriptionPopover" 
+			    	   th:attr="data-original-title=#{musician.first.listing.form.longDescription.popover.title},data-content=#{musician.first.listing.form.longDescription.popover.text}"
+			    	   th:text="#{musician.first.listing.form.longDescription.label}">Long Description:</a>
+				</label>
+	
+				<textarea class="form-control required" 
+					      name="longDescription" 
+					      id="longDescription" 
+					      rows="5"
+					      th:text="${#object.longDescription}"
+					      th:placeholder="#{musician.first.listing.form.longDescription.placeholder}"></textarea> 
+				<span th:if="${#fields.hasErrors('longDescription')}" class="help-block" th:errors="*{longDescription}">Invalid Long Description</span>
+				
+				
+			  </div>
+			  
+			  <button type="button" class="btn btn-primary" th:text="#{musician.first.listing.form.continue.button.text}" id="continue">Continue</button>
+			  
+		      <div style="margin-top: 50px;">
+		        <p>
+		          Got questions? You can reach us at <a href="mailto:support@socialeq.co">support@socialeq.co</a>
+		        </p>
+		      </div>			  
+			  
+			  <div class="modal fade" id="digitalContentModal">
+				  <div class="modal-dialog modal-lg">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				        <h4 class="modal-title">Upload Files</h4>
+				      </div><!-- modal-header -->
+				      
+				      <div tiles:include="digitalContentModalBody">
+					  </div><!--  /modal-body -->
+					  
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
+				        <button type="submit" class="btn btn-primary btn-lg" th:text="#{musician.first.listing.form.button.text}" id="submitSale">Create it</button>
+				      </div><!-- /.modal-footer -->
+				      
+				    </div><!-- /.modal-content -->
+				  </div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
+		    
+		    </form>
+	      </div>
+	    </div>
+	  </div>
+	  	
+	</div>
+</html>

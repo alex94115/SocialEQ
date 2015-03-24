@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+<body>
+	
+	<div tiles:fragment="body">
+		<div> 
+			<script	src="#"	th:src="@{/resources/js/async-phone-form.js}"></script>
+			<h2 th:text="#{user.profile.features.headline}">Rod Laver Features</h2>
+			<table class="table">
+				<thead>
+					<tr>
+						<th th:text="#{user.profile.features.authorized.label}">Giddy Up:</th>
+						<th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+						<th th:if="${not (#authorization.expression('hasRole(''ROLE_BUYER'')') and #authorization.expression('hasRole(''ROLE_SELLER'')') and #authorization.expression('hasRole(''ROLE_CHARITY'')') )}" 
+						    th:text="#{user.profile.features.not.authorized.label}">Not so Fast, Pardner:</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<div th:if="${#authorization.expression('hasRole(''ROLE_BUYER'')')}">
+								<i class="fa fa-check"></i> <span class="label label-primary" th:text="#{user.profile.features.giveaways.label}">Entering sweepstakes</span><br/>
+								<i class="fa fa-check"></i> <span class="label label-primary" th:text="#{user.profile.features.buying.label}">Buying Items</span><br/>
+							</div>
+							<div th:if="${#authorization.expression('hasRole(''ROLE_SELLER'')')}">
+								<i class="fa fa-check"></i> <span class="label label-primary" th:text="#{user.profile.features.selling.label}">Selling Items</span><br/>
+							</div>
+						</td>
+						<td></td>
+						<td>
+							<div th:if="${not #authorization.expression('hasRole(''ROLE_SELLER'')')}">
+								<i class="fa fa-times"></i> <span class="label label-default" th:text="#{user.profile.features.selling.label}">Selling Items</span><br/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div><!-- body-fragment -->
+		
+					
+		<div>
+			<h2 th:text="#{user.profile.account.info.headline}">Your Account Information</h2>
+	          <div class="bs-docs-example">
+	            <ul id="myTab" class="nav nav-tabs">
+	              <li class="active"><a href="#socialConnections" data-toggle="tab" th:text="#{user.profile.account.tab.social.connections}">Social Connections</a></li>
+	              <li><a href="#paymentProviders" data-toggle="tab" th:text="#{user.profile.account.tab.payment.providers}">Payment Providers</a></li>
+	              <li><a href="#contactInfo" data-toggle="tab" th:text="#{user.profile.account.tab.contact.info}">Contact Information</a></li>
+	              <li><a href="#shippingAddresses" data-toggle="tab" th:text="#{user.profile.account.tab.shipping.addresses}">Shipping Addresses</a></li>
+	            </ul>
+	            <div id="myTabContent" class="tab-content">
+	              <div class="tab-pane fade in active" id="socialConnections">
+	                <table class="table">
+						<thead>
+							<tr>
+								<th th:text="#{user.profile.account.social.connections.th.site}">Site</th>
+								<th th:text="#{user.profile.account.social.connections.th.status}">Status</th>
+								<th th:text="#{user.profile.account.social.connections.th.username}">Username</th>
+								<th></th>
+							</tr>	
+						</thead>
+						<tbody>
+							<tr th:if="${isTwitterEnabled}" th:unless="${hasTwitterConnection}">
+								<td>Twitter</td>
+								<td>Not Connected</td>
+								<td></td>
+								<td>
+									<form action="#" th:if="${doEnableConnectDisconnect}" th:action="@{/connect/twitter}" method="post" >
+										<fieldset>
+											<button type="submit" class="btn btn-primary" text="Connect" id="connect">Connect</button>
+										</fieldset>
+									</form>
+								</td>
+							</tr>
+							<tr th:if="${isTwitterEnabled}" th:each="twitterConnection : ${twitterConnections}">
+								<td th:text="#{user.profile.account.social.connections.label.twitter}">Twitter</td>
+								<td th:text="#{user.profile.account.social.connections.label.connected}">Connected</td>
+								<td>
+									<img src="#" style="width: 25px; height: 25px;" th:src="@{${twitterConnection.imageUrl}}" alt="Profile image"/>
+									<span th:text="${twitterConnection.displayName}">@screenname</span>
+								</td>
+								<td>
+								  <form action="#" th:if="${doEnableConnectDisconnect}" th:action="@{/connect/twitter}" method="post" >
+										<fieldset>
+										  <input type="hidden" name="_method" value="delete" />
+									      <button type="submit" class="btn btn-default" text="#{user.profile.account.social.connections.label.disconnect}">Disconnect</button>
+										</fieldset>
+									</form>
+								</td>
+							</tr>
+							<tr th:if="${isFacebookEnabled}" th:unless="${hasFacebookConnection}">
+								<td>Facebook</td>
+								<td>Not Connected</td>
+								<td></td>
+								<td>
+									<form action="#" th:if="${doEnableConnectDisconnect}" th:action="@{/connect/facebook}" method="post" >
+										<fieldset>
+											<button type="submit" class="btn btn-primary" text="Connect" id="connect">Connect</button>
+										</fieldset>
+									</form>
+								</td>
+							</tr>
+							<tr th:if="${isFacebookEnabled}" th:each="facebookConnection : ${facebookConnections}">
+								<td th:text="#{user.profile.account.social.connections.label.facebook}">Facebook</td>
+								<td th:text="#{user.profile.account.social.connections.label.connected}">Connected</td>
+								<td>
+									<img src="#" style="width: 25px; height: 25px;" th:src="@{${facebookConnection.imageUrl}}" alt="Profile image"/>
+									<span th:text="${facebookConnection.displayName}">screenname</span>
+								</td>
+								<td>
+								  <form action="#" th:if="${doEnableConnectDisconnect}" th:action="@{/connect/facebook}" method="post" >
+								    <fieldset>
+								      <input type="hidden" name="_method" value="delete" />
+									  <button type="submit" class="btn btn-default" th:text="#{user.profile.account.social.connections.label.disconnect}">Disconnect</button>
+									</fieldset>
+								  </form>
+								</td>
+							</tr>
+							<tr th:if="${isInstagramEnabled}" th:unless="${hasInstagramConnection}">
+								<td>Instagram</td>
+								<td>Not Connected</td>
+								<td></td>
+								<td>
+									<form action="#" th:action="@{/connect/instagram}" method="post" >
+										<fieldset>
+											<button type="submit" class="btn btn-primary" text="Connect" id="connect">Connect</button>
+										</fieldset>
+									</form>
+								</td>
+							</tr>
+							<tr th:if="${isInstagramEnabled}" th:each="instagramConnection : ${instagramConnections}">
+								<td th:text="#{user.profile.account.social.connections.label.instagram}">Instagram</td>
+								<td th:text="#{user.profile.account.social.connections.label.connected}">Connected</td>
+								<td>
+									<img src="#" style="width: 25px; height: 25px;" th:src="@{${instagramConnection.imageUrl}}" alt="Profile image"/>
+									<span th:text="${instagramConnection.displayName}">screenname</span>
+								</td>
+								<td><a href="#" class="btn btn-default" th:text="#{user.profile.account.social.connections.label.disconnect}">Disconnect</a></td>
+							</tr>
+							
+						</tbody>								
+					</table>
+	              </div>
+	              <div class="tab-pane fade" id="paymentProviders">
+	                <table class="table">
+						<thead>
+							<tr>
+								<th th:text="#{user.profile.account.payment.providers.th.connection}">Connection</th>
+								<th th:text="#{user.profile.account.payment.providers.th.account}">Account</th>
+								<th th:text="#{user.profile.account.payment.providers.th.expires}">Expires</th>
+								<th th:text="#{user.profile.account.payment.providers.th.action}">Action</th>
+							</tr>	
+						</thead>
+						<tbody>
+							<tr th:each="preapproval : ${preapprovals}">
+								<td>Credit Card</td>
+								<td th:text="${ #strings.length( preapproval.preapprovalKey ) > 20 ? #strings.substring(preapproval.preapprovalKey,0,20) : preapproval.preapprovalKey }">PA-41Y25196UN0000000</td>
+								<td th:text="${#dates.format(preapproval.end, 'MM/yyyy')}">03/2013</td>
+								<td></td>
+							</tr>
+							<tr th:unless="${hasPaypalPreapproval}">
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>	
+						</tbody>								
+					</table>
+	              </div>
+	              <div class="tab-pane fade" id="contactInfo">
+		            <table class="table">
+		              <tbody>
+		              	<tr>
+		              	  <td class="col-xs-2"><strong>Email:</strong></td>
+		              	  <td> 
+   						    <address th:if="${user.emailAddress}">
+						      <span th:text="${user.emailAddress}">user@domain.com</span>
+							</address>
+							<p th:unless="${user.emailAddress}" th:text="#{user.profile.account.email.nonexistent}">You don't have any email addresses on file.</p>
+		              	  </td>
+		              	</tr>
+		              	<tr th:if="${isMobilePhoneUserProfileEnabled}">
+		              	  <td class="col-xs-1"><strong>Mobile Phone:</strong></td>
+		              	  <td> 
+		                    <span th:if="${user.mobileNumber}">
+			              	  <span th:if="${user.isMobileVerified}" class="label label-info">Verified</span>
+			              	  <br th:if="${user.isMobileVerified}" />
+			              	  <address th:text="${user.screenFormattedMobileNumber}">+1 (505) 222-3333</address>
+		              	    </span> 
+   							<span th:unless="${user.mobileNumber}">
+    						  <!-- Bootstrap trigger to open modal -->
+						      <button class="btn btn-primary" data-toggle="modal" data-target="#mobile-phone-modal">Add Mobile Phone</button>
+							</span>
+		              	  </td>
+		              	</tr>
+		              </tbody>
+		             </table>
+	              </div>
+	              <div class="tab-pane fade" id="shippingAddresses">
+	                <div th:unless="${#lists.isEmpty(addresses)}" th:each="address : ${addresses}">
+					  <div th:unless="${address.isPrimary}">
+					    <form role="form" th:action="@{'setPrimaryAddress'(id=${address.id})}" method="POST">
+                          <button type="submit" class="btn btn-primary btn-xs" th:text="#{user.profile.account.shipping.setIsPrimary}">Make Primary</button>
+                        </form>
+					  </div>
+					  <div th:if="${address.isPrimary}" class="btn btn-info btn-xs">Primary</div>
+		              <address>
+						<span th:text="${address.firstLine}">123 Main St</span><br th:if="${address.firstLine}" />
+						<span th:if="${not #strings.isEmpty(address.secondLine)}" th:text="${address.secondLine}">Second Line</span><span th:unless="${#strings.isEmpty(address.secondLine)}"><br/></span>
+						<span th:if="${not #strings.isEmpty(address.thirdLine)}" th:text="${address.thirdLine}">Third Line</span><span th:unless="${#strings.isEmpty(address.thirdLine)}"><br/></span>
+						<span th:text="${address.city} + ', ' + ${address.state} + ' ' + ${address.zip}">City, XX 00000</span>
+						<span th:unless="${address.isPrimary}"><br/></span>
+					  </address>
+					  <p />
+					</div>
+					<p th:if="${#lists.isEmpty(addresses)}" th:text="#{user.profile.account.shipping.nonexistent}">You don't have any shipping addresses on file -- we'll ask you to add one if you buy an item that needs to be shipped.</p>
+	              </div>
+	            </div>
+	          </div>
+	          
+	          <div class="modal fade" id="mobile-phone-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	            <div class="modal-dialog">
+	              <div class="modal-content">
+					  <div class="modal-header" data-show="true">
+					    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					    <h4 class="modal-title" id="myModalLabel" th:text="#{user.profile.add.mobile.headline}">Your Mobile Phone</h4>
+					  </div>
+					 
+					  <div class="modal-body" data-show="true">
+					    <!-- The async form to send and replace the modal's content with its response -->
+					    <form class="form-horizontal well" id="mobilePhoneData" data-target="#mobile-phone-modal" action="addMobilePhone" method="POST">
+					      <fieldset>
+					        <!-- form content -->
+					        
+					        <div class="row">
+							  <div class="col-sm-11">
+							    <div class="form-group hidden has-error bg-danger" id="mobileFormErrorHeaderDiv">
+								  <button type="button" class="close" aria-hidden="true" data-dismiss="alert">&times;</button>
+								  
+								  <div class="hidden alert alert-error" id="mobileNumberErrorHeaderDiv">
+									<strong th:text="#{user.profile.add.mobile.form.error.number.alert}">Error: Mobile Number.</strong>
+								  </div>
+								  
+								  <div class="hidden alert alert-error" id="verificationCodeErrorHeaderDiv">
+									<strong th:text="#{user.profile.add.mobile.form.error.code.alert}">Error: Verification Code.</strong>
+								  </div>
+								</div>
+							  </div>
+						    </div>
+						    
+					        <div>
+					        	
+					        	<div class="hidden alert alert-error" id="mobileNumberErrorHeaderDiv">
+									<button type="button" class="close" data-dismiss="alert">x</button>
+									<strong th:text="#{user.profile.add.mobile.form.error.number.alert}">Error: Mobile Number.</strong>
+								</div>
+								<div class="hidden alert alert-error" id="verificationCodeErrorHeaderDiv">
+									<button type="button" class="close" data-dismiss="alert">x</button>
+									<strong th:text="#{user.profile.add.mobile.form.error.code.alert}">Error: Verification Code.</strong>
+								</div>
+								
+					        	
+								<div class="form-group" id="inputMobileNumberDiv">
+									<label for="mobileNumber" th:text="#{user.profile.add.mobile.number.label}">Mobile Number: </label>
+									<div class="input-group">
+										<input type="text" class="form-control" name="mobileNumber" id="mobileNumber" placeholder="505-333-2222" /> 
+									</div>
+									<span class="hidden help-block" id="mobileNumberErrorDiv" th:text="#{user.profile.add.mobile.error.number}">Invalid Number</span>
+								</div>
+
+								<div class="hidden form-group" id="inputVerificationCodeDiv">
+									<p th:text="#{user.profile.add.mobile.verification.code.text}">When you receive a confirmation code, enter it here:</p>
+									<label for="verificationCode" class="control-label" th:text="#{user.profile.add.mobile.verification.code.label}">Verification Code: </label>
+									<div class="input-group">
+										<input type="text" class="form-control" name="verificationCode" id="verificationCode" placeholder="Confirmation Code" /> 
+									</div>
+									<span class="hidden help-block" id="verificationCodeErrorDiv" th:text="#{user.profile.add.mobile.error.verificationCode}">Invalid Verification Code</span>
+								</div>
+
+
+						    </div>
+					      </fieldset>
+					    </form>
+					  </div>
+					 
+					  <div class="modal-footer" data-show="true">
+					     <button type="button" class="btn btn-primary" id="submitMobileNumber">Add Mobile Number</button>
+					  	 <button type="button" class="hidden btn btn-primary" id="submitVerificationCode">Submit Verification Code</button>
+					     <button type="button" class="hidden btn btn-primary" id="cancelAddMobile">Cancel</button>
+					  </div>
+					</div>
+				  </div>
+				</div>
+				
+				<!-- Preapproval Modal -->
+				<div class="modal fade" id="preapprovalModal" tabindex="-1" role="dialog" aria-labelledby="preapprovalModalLabel" aria-hidden="true">
+				  <div class="modal-dialog">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				        <h5 class="modal-title" id="preapprovalModalLabel">Add preapproval</h5>
+				      </div>
+				      <div class="modal-body">
+				        <p>When you make your first purchase, you can store your credit card for seamless checkout via SocialEQ in the future.</p>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+			 
+
+		</div><!--  body-fragment -->				
+	</div>
+
+</body>
+</html>

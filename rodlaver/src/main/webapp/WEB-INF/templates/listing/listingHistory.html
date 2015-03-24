@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	th:with="activePage='sale.listingHistory',
+			 isUserLoggedIn=${not #strings.containsIgnoreCase(#authentication.name, 'anonymousUser')}">
+
+	<div tiles:fragment="body">
+		<div th:if="${page.totalElements == 0 }">
+			<h2 th:text="#{sale.listingHistory.h2.headline}">Listing History</h2>
+	        <p>You don't have any listings. In the future, this page will show a list of your current and past listings.</p>
+		</div>
+		
+		<div th:if="${page.totalElements > 0}">
+			<h2 th:text="#{sale.listingHistory.h2.headline}">Listing History</h2>
+           	<p th:inline="text">Total number of listings: [[${page.totalElements}]]</p>
+	                 
+	           <table class="table table-striped">
+	            <thead>
+	           	  <tr>
+		            <th th:text="#{sale.listingHistory.table.heading.title}">Title</th>
+		            <th th:text="#{sale.listingHistory.table.heading.price}">Price</th>
+		            <th th:text="#{sale.listingHistory.table.heading.type}">Sale Type</th>
+		            <th th:text="#{sale.listingHistory.table.heading.status}">Sale Status</th>
+		            <th th:text="#{sale.listingHistory.table.heading.expires}">Expires</th>
+		            <th>Activity</th>
+	              </tr>
+	            </thead>
+		                  
+	            <tbody>
+	             <tr th:each="listing : ${page.content}">
+	                 <td>
+	                   <a href="#" th:href="@{'../listingDetail/' + ${listing.id}}"><span th:text="${listing.title}">URL</span></a>
+	                 </td>
+	                 <td>
+	                   <span th:if="${listing.amount}"><span th:text="'$ ' + ${#numbers.formatDecimal(listing.amount, 0, 'COMMA', 2, 'POINT')}">1.99</span></span>
+	                   <span th:unless="${listing.amount}">-</span>
+	                 </td>
+	                 <td>
+	                   <span th:text="#{${listing.listingTypeMessageKey}}">Type</span>
+	                 </td>
+	                 <td>
+	                   <span th:text="#{${listing.listingStatusMessageKey}}">Status</span>
+	                 </td>
+	                 <td th:text="${#dates.format(listing.expires, 'MMM dd h:mm a z')}">SEP 03 12:00 am PDT</td>
+	                 <td><a th:href="@{'/analytics/detail/' + ${listing.id} + '/week'}" href="#">Stats</a></td>
+	             </tr>
+	            </tbody>
+	           </table>
+	
+			<div tiles:include="pagination"></div>
+		</div>
+		
+	</div>
+</html>

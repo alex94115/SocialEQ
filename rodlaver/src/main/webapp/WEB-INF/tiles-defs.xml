@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+ "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
+ "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+<tiles-definitions>
+
+
+	<!--                     -->
+	<!-- Homepage layout -->
+	<!--                     -->
+	
+	<definition name="homepage" template="homepage" templateType="thymeleaf">
+		<put-attribute name="header" value="include :: header" type="thymeleaf"/>
+		<put-attribute name="scripts" value="include :: scripts" type="thymeleaf"/>
+		<put-attribute name="homepage-topnav" type="thymeleaf">
+			<definition template="include :: authentication-banner">
+				<put-attribute name="leftnav" value="include :: homepage-topleftnav" type="thymeleaf"/>
+			</definition>
+		</put-attribute>
+		<put-attribute name="footer-band" value="include :: footer-band" type="thymeleaf"/>
+	</definition>
+
+	<!--                     -->
+	<!-- Root Content layout -->
+	<!--                     -->
+	
+	<definition name="rootContentLayout" template="root-site-template" templateType="thymeleaf">
+		<put-attribute name="header" value="include :: header" type="thymeleaf"/>
+		<put-attribute name="scripts" value="include :: scripts" type="thymeleaf"/>
+		<put-attribute name="homepage-topnav" type="thymeleaf">
+			<definition template="include :: authentication-banner">
+				<put-attribute name="leftnav" value="include :: homepage-topleftnav" type="thymeleaf"/>
+			</definition>
+		</put-attribute>
+		<put-attribute name="footer-band" value="include :: footer-band" type="thymeleaf"/>
+	</definition>
+
+	<!--                    	  -->
+	<!-- Content Page Definitions -->
+	<!--                     	  -->
+	
+	<definition name="about" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: about-hero-band"></put-attribute>
+	</definition>
+	
+	<definition name="contact" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: contact-hero-band"></put-attribute>
+	</definition>
+	
+	<definition name="privacy" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: privacy-hero-band"></put-attribute>
+	</definition>
+	
+	<definition name="terms" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="terms :: body"></put-attribute>
+	</definition>
+
+	<definition name="braintreeMerchantTerms" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: braintreeMerchantTerms"></put-attribute>
+	</definition>
+	
+	<definition name="support" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: support-hero-band"></put-attribute>
+	</definition>
+
+	<definition name="faq" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: faq"></put-attribute>
+	</definition>
+
+
+	<definition name="sellOnFacebook" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: sell-on-facebook"></put-attribute>
+	</definition>
+
+	<definition name="sellOnTwitter" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: sell-on-twitter"></put-attribute>
+	</definition>
+
+	<definition name="donate" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: donate"></put-attribute>
+	</definition>
+
+	<definition name="contestsAndPromotions" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: contests-and-promotions"></put-attribute>
+	</definition>
+	
+	<definition name="maintenance" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="content-fragments :: maintenance"></put-attribute>
+	</definition>
+
+	<!--                                  -->
+	<!-- Standard application page layout -->
+	<!--                                  -->
+	
+	<definition name="standardLayout" template="standard-application-template" templateType="thymeleaf">
+		<put-attribute name="header" value="include :: header" type="thymeleaf"/>
+		<put-attribute name="scripts" value="include :: scripts" type="thymeleaf"/>
+		<put-attribute name="authentication-banner" type="thymeleaf">
+			<definition template="include :: authentication-banner">
+				<put-attribute name="leftnav" value="include :: application-topleftnav" type="thymeleaf"/>
+			</definition>
+		</put-attribute>
+		<put-attribute name="alert-drawer" value="include :: alert-drawer" type="thymeleaf"/>
+		<put-attribute name="footer-band" value="include :: footer-band" type="thymeleaf"/>
+	</definition>
+
+	<!--                                  -->
+	<!-- Application page definitions     -->
+	<!--                                  -->
+
+
+	<!--     	              -->
+	<!--  Mediator Controller -->
+	<!--     	              -->
+
+	
+	<!--  Signin  -->
+    <definition name="signin/signin" extends="standardLayout">
+		<put-attribute name="body" value="content-fragments :: signin-hero-band" type="thymeleaf"/>
+	</definition>
+	
+	 <!--  Signup  -->
+    <definition name="signup" extends="standardLayout">
+    	<put-attribute name="body" value="content-fragments :: signup-hero-band" type="thymeleaf"/>
+	</definition>
+
+	<!--  User Home (logged in buyers) -->
+    <definition name="userHome" extends="standardLayout">
+    	<put-attribute name="body" value="userHome :: body" type="thymeleaf"/>
+    </definition>
+
+	<!--  Seller Home (logged in sellers and charities) -->
+    <definition name="sellerHome" extends="standardLayout">
+    	<put-attribute name="body" value="sellerHome :: body" type="thymeleaf"/>
+    	<put-attribute name="pagination" value="include :: pagination" type="thymeleaf" cascade="true"/>
+    </definition>
+
+	<!--     	               -->
+	<!--  Analytics Controller -->
+	<!--     	               -->
+
+    <definition name="analytics/overview" extends="standardLayout">
+    	<put-attribute name="body" value="analytics/overview :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="analytics/detail" extends="standardLayout">
+    	<put-attribute name="body" value="analytics/detail :: body" type="thymeleaf"/>
+    </definition>
+
+	<!--     	             -->
+	<!--  Listing Controller -->
+	<!--     	             -->
+	
+    <definition name="listing/listingDetail" extends="standardLayout">
+    	<put-attribute name="body" value="listing/listingDetail :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="listing/listingHistory" extends="standardLayout">
+    	<put-attribute name="body" value="listing/listingHistory :: body" type="thymeleaf"/>
+    	<put-attribute name="pagination" value="include :: pagination" type="thymeleaf" cascade="true"/>
+    </definition>
+    
+    <definition name="listing/replyActivity" extends="standardLayout">
+    	<put-attribute name="body" value="listing/replyActivity :: body" type="thymeleaf"/>
+    	<put-attribute name="pagination" value="include :: pagination" type="thymeleaf" cascade="true"/>
+    </definition>
+
+    <definition name="listing/new" extends="standardLayout">
+    	<put-attribute name="body" value="listing/new :: body" type="thymeleaf"/>
+    	<put-attribute name="digitalContentModalBody" value="include :: digitalContentModalBody" type="thymeleaf" cascade="true"/>
+    </definition>
+    
+    <definition name="listing/finishCheckout" extends="standardLayout">
+    	<put-attribute name="body" value="listing/finishCheckout :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="listing/returnedFromCheckout" extends="standardLayout">
+    	<put-attribute name="body" value="listing/returnedFromCheckout :: body" type="thymeleaf"/>
+    </definition>
+
+    <definition name="listing/transactionDetail" extends="standardLayout">
+    	<put-attribute name="body" value="listing/transactionDetail :: body" type="thymeleaf"/>
+    </definition>
+
+    <definition name="listing/transactionHistory" extends="standardLayout">
+    	<put-attribute name="body" value="listing/transactionHistory :: body" type="thymeleaf"/>
+    	<put-attribute name="pagination" value="include :: pagination" type="thymeleaf" cascade="true"/>
+    </definition>
+    
+    <definition name="listing/commentInstructions" extends="standardLayout">
+    	<put-attribute name="body" value="listing/commentInstructions :: body" type="thymeleaf"/>
+    </definition>
+    
+	<!--     	                  -->
+	<!--  User Account Controller -->
+	<!--     	                  -->
+
+    <definition name="user/profile" extends="standardLayout">
+    	<put-attribute name="body" value="user/profile :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="user/admin" extends="standardLayout">
+    	<put-attribute name="body" value="user/admin :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="user/sellerFacebookToken" extends="standardLayout">
+    	<put-attribute name="body" value="user/sellerFacebookToken :: body" type="thymeleaf"/>
+    </definition>
+    
+    <!--                    	                -->
+	<!--  Registration Controller -->
+	<!--     	                                -->
+    
+    <definition name="registration/start" extends="standardLayout">
+    	<put-attribute name="body" value="registration/start :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="registration/unableToRegister" extends="standardLayout">
+    	<put-attribute name="body" value="registration/unableToRegister :: body" type="thymeleaf"/>
+    </definition>
+
+    <definition name="registration/facebookPermissionsAppeal" extends="standardLayout">
+    	<put-attribute name="body" value="registration/facebookPermissionsAppeal :: body" type="thymeleaf"/>
+    </definition>
+
+    <definition name="registration/chooseFacebookPage" extends="standardLayout">
+    	<put-attribute name="body" value="registration/chooseFacebookPage :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="registration/ineligibleForFacebook" extends="standardLayout">
+    	<put-attribute name="body" value="registration/ineligibleForFacebook :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="registration/linkTwitter" extends="standardLayout">
+    	<put-attribute name="body" value="registration/linkTwitter :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="registration/addSellerInfo" extends="standardLayout">
+    	<put-attribute name="body" value="registration/addSellerInfo :: body" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="registration/createListing" extends="standardLayout">
+    	<put-attribute name="body" value="registration/createListing :: body" type="thymeleaf"/>
+    	<put-attribute name="digitalContentModalBody" value="include :: digitalContentModalBody" type="thymeleaf" cascade="true"/>
+    </definition>
+    
+    <definition name="registration/finished" extends="standardLayout">
+    	<put-attribute name="body" value="registration/finished :: body" type="thymeleaf"/>
+    </definition>
+    
+	<!--       			  -->
+	<!--     Error Pages  -->
+    <!--       			  -->
+    
+    <definition name="error" extends="rootContentLayout">
+		<put-attribute name="primary-page-content" value="error :: body" type="thymeleaf"/>
+	</definition>
+	
+	<definition name="denied" extends="standardLayout">
+		<put-attribute name="body" value="denied :: body" type="thymeleaf"/>
+	</definition>
+	
+	<definition name="applicationError" extends="standardLayout">
+		<put-attribute name="body" value="applicationError :: body" type="thymeleaf"/>
+	</definition>
+	
+</tiles-definitions>

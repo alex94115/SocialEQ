@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+<body>
+
+	<div tiles:fragment="signin-hero-band">
+
+		<div class="wrapper">
+			<div class="container fluid">
+				<div class="row">
+				  <div th:unless="${isRegistrationFlow}" class="col-md-8">
+					<h1>Sign In</h1>
+
+					<p>
+						To sign in to SocialEQ, click on one of the Twitter or Facebook
+						buttons below. You may be asked to approve associating your
+						account to SocialEQ. This is both secure and
+						there's no new username or password to remember.
+					</p>
+
+					<p>
+						Don't worry - SocialEQ will never have access to
+							your password and we will never post anything on
+							your behalf.
+					</p>
+
+					<p th:if="${isTwitterEnabled}">
+					  <a th:href="@{/auth/twitter}"><img th:src="@{/resources/images/twitter/sign-in-with-twitter-gray.png}" /></a>
+					</p>
+					
+					<p th:if="${isFacebookEnabled}">
+					  <a th:href="@{/auth/facebook}">
+					    <img name="signInWithFacebook" src="#"
+							 th:src="@{/resources/images/facebook/login-with-facebook.png}"
+							 style="width: 170px; padding-top: 5px; padding-bottom: 5px;"
+							 alt="Sign In with Facebook image" />
+					  </a>
+					</p>
+					
+					<form th:if="${isInstagramEnabled}" action="#" th:action="@{/signin/instagram}" method="post">
+						<fieldset>
+							<button type="submit" class="btn" id="connect">Sign In With Instagram</button>
+							<input type="hidden" name="scope" value="comments" />
+						</fieldset>
+					</form>
+				  </div>
+				  
+				  <div th:if="${isRegistrationFlow}" id="registration-wrapper">
+				  
+				    <div th:if="${#strings.containsIgnoreCase(subFlow,'facebook')}">
+				      
+				      <div class="row">
+				        <div class="col-sm-12">
+				          <div class="headline">
+				            <h1>Sell directly to your fans with fees 67% lower than iTunes</h1>
+				            <h2>It's free to register and you'll be done in a few minutes.</h2>
+				          </div>
+				        </div>
+				      </div>
+				      
+				      <div class="row">
+				        <div class="col-sm-8">
+				          <p>
+					        SocialEQ lets you take control by letting you sell digital music directly
+					        to your followers on Facebook and Twitter. It's completely risk free to sign up:
+					        there's never any fee except a small percentage of your sales.
+					      </p>
+					      
+					      <div>
+						    <iframe width="560" height="315" src="//www.youtube.com/embed/cpijtqFouK0?rel=0" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
+						  </div>
+					      
+					      <p>
+					        How do our fees work? Simple: they're the lowest around. We charge a flat 10% of sales. And unlike 
+					        the other guys, we don't charge more for processing credit card payments.
+					      </p>
+				        
+				          <p>
+					        Start by logging in to Facebook to create your account.
+					      </p>
+					
+					      <p th:if="${isFacebookEnabled}">
+					        <a th:href="@{/auth/facebook(scope='manage_pages,publish_actions')}">
+					          <img name="signInWithFacebook" src="#"
+							     th:src="@{/resources/images/facebook/login-with-facebook.png}"
+							     style="width: 170px; padding-top: 5px; padding-bottom: 5px;"
+							     alt="Sign In with Facebook image" />
+					        </a>
+					      </p>
+					  
+					      <p class="secondary-option">
+					        <a href="#" th:href="@{/registration/addSellerInfo(doBypassFacebook='true')}">I don't want to sell via Facebook</a>
+					      </p>
+					      
+					      <div style="margin-top: 50px;">
+					      	<p>
+					      	  Got questions? You can reach us at <a href="mailto:support@socialeq.co">support@socialeq.co</a>
+					      	</p>
+					      </div>
+					
+					    </div>
+				      </div>
+				    </div>
+				  </div>
+				  
+				  <div th:if="${isRegistrationFlow}" id="registration-wrapper">
+				    
+				    <div th:if="${#strings.containsIgnoreCase(subFlow,'twitter')}">
+				    
+				      <div class="row">
+				        <div class="col-sm-12">
+
+				          <div class="headline">
+				            <h1>You can sell fan direct on Twitter.</h1>
+				          </div>
+				        </div>
+				      </div>
+				    
+				    
+				      <div class="row">
+				        <div class="col-sm-8">
+				        
+				          <p>
+					        You can still take advantage of our great features and low fees to sell fan direct on 
+					        Twitter.
+					      </p>
+					      
+				          <p>
+					        Start by logging in to Twitter to create your account.
+					      </p>
+					
+					      <p>
+					        <a th:href="@{/auth/twitter}"><img th:src="@{/resources/images/twitter/sign-in-with-twitter-gray.png}" /></a>
+					      </p>
+					
+					      <p class="secondary-option">
+					        <a href="#" th:href="@{/registration/bypassTwitter}">I don't want to sell via Twitter</a>
+					      </p>
+					    </div>
+					  </div>
+				    </div>
+				  </div>
+				  
+				  
+				</div>
+			</div>
+		</div>
+
+	</div>
+	
+	
+	<div tiles:fragment="signup-hero-band">
+
+		<div class="wrapper">
+			<div class="container-fluid">
+				<div class="row">
+				  <div class="col-md-8">	
+					<h1>Sign Up</h1>
+
+					<div th:unless="${hasPendingConnection}">
+						<p>
+							SocialEQ gives you the power to win giveaways and buy from artists and brands you
+							love within your favorite social sites like Twitter and Facebook.
+						</p>
+				
+						<p>
+							To make it work, you need register with SocialEQ. Registration
+							takes five seconds and once you're signed up, you'll never have to do
+							this step again.</p>
+				
+						<p>
+							First, click on one of the Twitter or Facebook buttons below. You may
+							be asked to approve associating your account to SocialEQ. This is both
+							secure and there's <b>no new username or password to remember!</b>
+						</p>
+				
+						<p>Don't worry - SocialEQ will never have access to your password
+							and we will never post anything on your behalf.</p>
+				
+						<p th:if="${isTwitterEnabled}">
+						  <a th:href="@{/auth/twitter}"><img th:src="@{/resources/images/twitter/sign-in-with-twitter-gray.png}" /></a>
+						</p>
+						
+						<p th:if="${isFacebookEnabled}">
+						  <a th:href="@{/auth/facebook}">
+						    <img name="signInWithFacebook" src="#"
+								 th:src="@{/resources/images/facebook/login-with-facebook.png}"
+								 style="width: 170px; padding-top: 5px; padding-bottom: 5px;"
+								 alt="Sign In with Facebook image" />
+						  </a>
+						</p>
+						
+					</div>
+				
+					<div th:if="${hasPendingConnection}">
+				
+						<p>
+							Just enter your email address and click the Sign In button below to finish creating your account.
+							By clicking the button, you agree that you have read and accepted our
+							<a href="#" th:href="@{/terms}">Terms and Conditions</a>
+						</p>
+						
+						<form class="form-horizontal" 
+						      action="#" 
+						      th:action="@{/signup}" 
+						      method="post"
+						      th:object="${signUpForm}">
+							
+						  <div class="form-group">
+						    <label for="emailInput" class="col-sm-2">Email Address</label>
+							<div class="col-sm-10">
+							  <input type="email" class="form-control" id="emailInput1" name="emailInput1" placeholder="Enter email" />
+							</div>
+						  </div>
+						  <div class="form-group">
+						    <div class="col-sm-offset-2 col-sm-10">
+							  <input type="email" class="form-control" id="emailInput2" name="emailInput2" placeholder="Re-enter email" />
+							</div>
+						  </div>
+						  <div class="form-group">
+						    <div class="col-sm-offset-2 col-sm-10">
+						      <div class="checkbox">
+							    <label>
+							      <input type="checkbox" id="doAllowSellerEmails" name="doAllowSellerEmails" checked="checked" /> I want to receive occasional emails from the sellers I buy from 
+							    </label>
+							  </div>
+						    </div>
+						  </div>
+							
+						  <input type="hidden" id="tosVersion" name="tosVersion" value="200" />
+						  <button type="submit" class="btn herobtn" style="margin-bottom: 30px; padding-bottom: 15px" id="signupButton">Sign Up</button>
+							
+						</form>
+				
+						<div>Thanks for using SocialEQ.</div>
+						
+					    <script th:inline="javascript">
+						/*<![CDATA[*/
+						           
+						    $("#signupButton").attr( "disabled", true );
+						     
+							$("#emailInput1").on("keyup change", function( event ) {
+								$("#signupButton").attr( "disabled", !hootit.validateEmail( $("#emailInput1").val(),  $("#emailInput2").val() ) );
+							});
+							
+							$("#emailInput2").on("keyup change", function( event ) {
+								$("#signupButton").attr( "disabled", !hootit.validateEmail( $("#emailInput1").val(),  $("#emailInput2").val() ) );
+							});
+							
+						/*]]>*/
+						</script>
+						
+					</div>
+
+				  </div>	
+				</div>
+			</div>
+		</div>
+	</div>
+	
+		<div tiles:fragment="privacy-hero-band">
+
+		<div class="wrapper">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-8">
+						<h2>SocialEQ</h2>
+						<h2>Privacy Policy</h2>
+						<h6>Last updated on July 1, 2014</h6>
+						<p>Purple &amp; Gold, Inc. ("SocialEQ," "we,", "us", "our", or
+							the "Company") operates the website located at https://socialeq.co 
+							(the "Site") and we are committed to
+							protecting the privacy of personal information of users and this
+							Privacy Policy explains how we collect, use, and protect your
+							information. Specifically, this Privacy Policy describes the
+							types of information we may collect from you or that you may
+							provide when you visit our website, the types of information that
+							we may collect when you purchase products, and our practices for
+							collecting, using, maintaining, protecting, and disclosing that
+							information. To access the full range of services our website
+							provides you must login using your credentials from either
+							Twitter or Facebook. Please note, these sites collect and use of
+							your personal information and your conduct is governed by either
+							Facebook, Twitter, Braintree, a division of Paypal, Inc. or
+							Paypal's privacy policy, which we ask that you also read and
+							accept.</p>
+						<h3>SocialEQ Collects Personal Data</h3>
+						<p>Personal Data includes data that is used to identify,
+							communicate, and serve you. We may maintain personal data
+							obtained from third party sources. For example, when you log into
+							your account using your Facebook, Twitter, Braintree or Paypal
+							account, you allow us to access certain information. We may
+							access and store some or all of the following information, as
+							allowed by you, Twitter, Facebook, and your personal privacy
+							settings, including contact information (for instance, name,
+							address, telephone number, and email addresses), transaction
+							information (history of product purchases, and other information
+							related to this transaction):</p>
+						<ul class="standard">
+							<li>your "basic information" you have shared with everyone
+								on Facebook, Twitter, Braintree or Paypal;</li>
+							<li>your profile picture or its URL;</li>
+							<li>your user ID, which is linked to publicly available
+								information such as name and profile photo;</li>
+							<li>the e-mail address you provided to Facebook, Twitter,
+								Braintree or Paypal;</li>
+							<li>your "photo" information;</li>
+							<li>your "friends" information;</li>
+							<li>Other information indicated as part of the "Request for
+								Permission" prompt from Facebook, Twitter, Braintree or Paypal;</li>
+							<li>If a purchase is made we will maintain your shipping
+								address, to facilitate a transaction or to resolve any concerns
+								about a pending transaction.</li>
+						</ul>
+						<p>You agree to our access of such information when you login
+							using your credentials to either Facebook, Twitter, Braintree or
+							Paypal.</p>
+						<h3>How SocialEQ Collects Personal Data</h3>
+						<p>Personal Data is collected directly from our customers. Our
+							website uses forms for visitors to provide information for our
+							products and services, and to provide us with your feedback. We
+							may also collect Personal Data from third party data suppliers as
+							we are given access by the customer.</p>
+						<p>Using your Facebook, Twitter, Braintree or Paypal account
+							to log into your account will enable you complete transactions
+							through our website. If you decide to log in using your Facebook,
+							Twitter, Braintree or Paypal account, you give us permission to
+							access your Facebook, Twitter, Braintree or Paypal account, as
+							the case may be, for purposes of identifying your account,
+							associating your account with your Facebook, Twitter, Braintree
+							or Paypal account, and enabling you to make transactions through
+							our website. Any information associated with your Facebook,
+							Twitter, Braintree or Paypal account is provided by you to
+							Facebook, Twitter, Braintree or Paypal, as the case may be, not
+							to us, and its use is governed by the Facebook, Twitter,
+							Braintree or Paypal privacy policy, as the case may be. We will
+							access and store the information associated with your Facebook,
+							Twitter, Braintree or Paypal account (e.g., your Facebook or
+							Twitter username) required to identify your Facebook, Twitter,
+							Braintree or Paypal account and associate it with your account.</p>
+						<p>We will not rent, sell or exchange your email address or
+							any other information that personally identifies you, and we
+							generally restrict access to such information to qualified
+							employees and agents and trusted third parties who need access to
+							your information to provide operational or other support services
+							related to our website.</p>
+						<h3>Cookies and Other Automatic Collection Techniques</h3>
+						<p>We anticipate that we will gather and collect customer data
+							using cookies, web beacons, Google Analytics, etc.</p>
+						<p>As you navigate through and interact with our website, we
+							may use automatic data collection technologies to collect certain
+							information about your equipment, browsing actions, and patterns,
+							including:</p>
+						<ul class="standard">
+							<li>Details of your visits to our website, including traffic
+								data, location data, logs and other communication data and the
+								resources that you access and use on the website.</li>
+							<li>Information about your computer and Internet connection,
+								including your IP address, operating system, and browser type.</li>
+						</ul>
+
+						<p>We also may use these technologies to collect information
+							about your online activities over time and across third-party
+							websites or other online services (behavioral tracking).</p>
+						<p>The information we collect automatically is statistical
+							data and does may include personal information, but we may
+							maintain it or associate it with personal information we collect
+							in other ways or receive from third parties. It helps us to
+							improve our website and to deliver a better and more personalized
+							service, including by enabling us to:</p>
+						<ul class="standard">
+							<li>Estimate our audience size and usage patterns.</li>
+							<li>Store information about your preferences, allowing us to
+								customize our website according to your individual interests.</li>
+							<li>Speed up your transactions.</li>
+							<li>Recognize you when you return to our website.</li>
+						</ul>
+
+						<p>The technologies we use for this automatic data collection
+							may include:</p>
+
+						<ul class="standard">
+							<li>Cookies (or browser cookies). A cookie is a small file
+								placed on the hard drive of your computer. You may refuse to
+								accept browser cookies by activating the appropriate setting on
+								your browser. However, if you select this setting you may be
+								unable to access certain parts of our website. Unless you have
+								adjusted your browser setting so that it will refuse cookies,
+								our system will issue cookies when you direct your browser to
+								our website. If you would like to prevent the placement of
+								cookies on your computer or other device, or remove cookies from
+								your computer or other device, please access the "Help" portion
+								of your browser or contact your browser provider. Please be
+								advised that if you block or remove cookies from your computer,
+								the website will not recognize your computer and you may not
+								have access to all portions of the website.</li>
+							<li>Flash Cookies. Certain features of our website may use
+								local stored objects (or Flash cookies) to collect and store
+								information about your preferences and navigation to, from, and
+								on our website. Flash cookies are not managed by the same
+								browser settings as are used for browser cookies.</li>
+							<li>Web Beacons. Pages of our website and our e-mails may
+								contain small electronic files known as web beacons (also
+								referred to as clear gifs. pixel tags and single-pixel gifs)
+								that permit the Company, for example, to count users who have
+								visited those pages or opened an e-mail and for other related
+								website statistics (for example, recording the popularity of
+								certain website content and verifying system and server
+								integrity).</li>
+						</ul>
+
+						<p>We do not collect personal Information automatically, but
+							we may tie this information to personal information about you
+							that we collect from other sources or you provide to us.</p>
+
+						<h3>How SocialEQ Uses Data Collected From Customers</h3>
+
+						<p>Personal Data gathered by SocialEQ is used to improve our
+							products, services, and overall relationship with our customers
+							and is only collected if you voluntarily submit it to us. This
+							data may also be used for customer service, product support,
+							marketing, warranty support, and managing our everyday business
+							such as product development, analytics, reporting, and legal
+							compliance. We may, from time to time, use this information,
+							along with other non-personal information information received
+							from other sources, to send updates about system changes or new
+							products that we think may be of interest to you.</p>
+
+						<p>Data collected directly from our customers, from our
+							website, or from other transaction information from outside
+							sources may be used in aggregate with the intent of developing
+							new products and services for our clients. SocialEQ may also
+							publish reports that contain aggregated and statistical data
+							about our customers and equipment.</p>
+
+						<h3>Data Security</h3>
+
+						<p>SocialEQ has instituted a data security program that
+							contains numerous controls that are designed to reasonably
+							protect and safeguard Personal Information and avoid unauthorized
+							access or disclosure. These commercially reasonable security
+							measures are in place to protect customers from loss, misuse and
+							alteration of their information under our control, but we make no
+							assurances about our ability to prevent any such loss, misuse or
+							alteration, and we shall have no liability to you or any third
+							party from any loss, misuse or alteration. We do not and cannot
+							represent or warrant that your access to the website is
+							completely secure.</p>
+
+						<p>You should promptly notify SocialEQ if your account, user
+							name or password have been lost or stolen. SocialEQ will never
+							ask you for your password. If you need a new user name and/or
+							password, SocialEQ will generate a new user name through its
+							computers and send the means to set or change your password to
+							your e-mail.</p>
+
+						<h3>Disclosure of Data to Third Parties</h3>
+
+						<p>SocialEQ may share Personal Data with its subsidiaries and
+							affiliates, for the purposes listed above when needed to complete
+							a transaction or resolve concerns with ongoing transactions.</p>
+
+						<p>Other than authorized third-party service providers, we do
+							not sell, rent, or loan any personal information regarding our
+							customers to any non-affiliated companies. SocialEQ may choose to
+							contract or use affiliate companies that may have access to
+							customer data in order to perform specific tasks. Contracted
+							partners and affiliates will, at a minimum, pursuant to their
+							contractual obligations to SocialEQ, comply with the SocialEQ
+							privacy and data policies. Further, they will be required to use
+							any Personal Data only for the purposes for which we disclose it
+							to them.</p>
+
+						<p>We may disclose Personal Data if we believe that we are
+							required to do so by law, such as in response to a government or
+							court order, subpoena, or other legal process.</p>
+
+						<p>We may also disclose Personal Data if we believe disclosure
+							is necessary or appropriate to protect the rights, property, or
+							safety of SocialEQ, our customers or others.</p>
+
+						<p>Finally, we may disclose Personal Data as part of a future
+							merger, acquisition, debt financing, or other sale or transfer of
+							SocialEQ assets.</p>
+
+						<h3>Access to Data</h3>
+
+						<p>Customers who wish to review or change Personal Data held
+							by SocialEQ may do so by directing correspondence to
+							privacy@socialeq.co</p>
+
+						<p>Customers who do not wish to have Personal Data shared with
+							third parties for marketing purposes can opt-out of such
+							disclosures by sending a request to privacy@socialeq.co. Please
+							include your full name, email address, and postal address with
+							such a request.</p>
+
+						<h3>Use of Your Email Address/Anti-Spam Policy</h3>
+
+						<p>We do not send unsolicited marketing emails, and we will
+							not sell or rent your email address. If you provide us with your
+							email address as a login ID or for other purposes, we may use
+							your email address to contact you regarding your account. For
+							example, if you forget your password, we may send instructions
+							for resetting your password to your email address. We will not
+							send any marketing emails to your email address unless you
+							specifically opt in to receive such emails, and you can
+							unsubscribe from marketing emails at any time by clicking the
+							"unsubscribe" link at the bottom of each marketing email. Once we
+							receive your unsubscribe request, please allow 72 hours for us to
+							comply with it.</p>
+
+						<p>Please note that we may not include unsubscribe information
+							in non-marketing emails (i.e., emails concerning your account,
+							emails to help you reset your password, emails confirming recipes
+							purchased by you, etc.).</p>
+
+						<h3>Do Not Track</h3>
+
+						<p>No action is taken in response to web browser "do not
+							track" signals or other mechanisms that provide consumers the
+							ability to exercise choice regarding the collection of personally
+							identifiable information about an individual consumer's online
+							activities over time and across third-party websites or online
+							services. No third parties collect personally identifiable
+							information about an individual consumer's online activities when
+							a consumer uses our websites.</p>
+
+						<h3>Children's Privacy</h3>
+
+						<p>All SocialEQ products are commercial in nature and are not
+							intended to collect data from children. If there are concerns
+							about any unintended data retention, please contact us using the
+							details below and requests will be investigated and addressed as
+							appropriate.</p>
+
+						<h3>Changes to the Policy</h3>
+
+						<p>We may change this privacy policy from time to time in our
+							sole and absolute discretion. Please check this website regularly
+							for changes. Substantive revisions to this privacy policy shall
+							apply only prospectively. Existing account owners of our products
+							will be notified of any material changes.</p>
+
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div tiles:fragment="support-hero-band">
+
+		<div class="wrapper">
+			<div class="container-fluid">
+				<div class="row">
+				  <div class="col-md-8">
+					<h3>Support</h3>
+					<p>
+						Questions or comments about SocialEQ? You can reach us 24/7/365 at
+						<a href="mailto:support@socialeq.co">support@socialeq.co</a>
+					</p>
+					<h3>Refunds</h3>
+					<p>
+						At SocialEQ our goal is to make you happy so that you'll continue
+						to support our advertisers and partners. If at any time you find a
+						purchase from your account that you didn't authorize, we will work
+						with you to make things right. Email <a
+							href="mailto:support@socialeq.co">support@socialeq.co</a> with
+						a brief message describing the problem and include the date and amount of the
+						charge in question. From there our team will look at your social
+						feed and make a decision on how to handle your refund request.
+					</p>
+				  </div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div tiles:fragment="faq">
+
+		<div class="wrapper">
+			<div class="container-fluid">
+				<div class="row">
+				  <div class="col-md-8">
+
+						<h3>General Questions</h3>
+						<h4>What is SocialEQ?</h4>
+						<p>SocialEQ is a low cost fan direct music selling platform.
+							Instead of dragging CDs to your gigs you can now tell your fans
+							to simply tweet a hashtag or post on your Facebook wall to
+							immediately purchase your music.</p>
+						<h4>How does it work?</h4>
+						<p>SocialEQ's magic is in it's simplicity. You create a
+							Facebook post or a tweet in our system. When a fan replies to
+							that post/tweet with a hashtag that was created especially for
+							you we do the rest. An automated reply from your account is sent
+							to the user with a link that they follow to checkout and get
+							their music.</p>
+						<p>The best part about SocialEQ is that it works on any web
+							enabled device. Fans that are at your live show can now purchase
+							your music in real-time on their phone with minimal hassles.</p>
+						<h4>Sounds like something I should be using, what do I need
+							to sell with SocialEQ?</h4>
+						<p>Getting started on SocialEQ is simple and only requires you
+							to have three things:</p>
+						<ul class="standard">
+							<li>A Facebook or Twitter account (we highly recommend
+								having both - they are free and offer different promotional
+								value to you as an artist)</li>
+							<li>An email address (we require an email address so we can
+								pay you)</li>
+							<li>The rights to the music you're selling (so your label
+								doesn't try to sue you)</li>
+						</ul>
+						<h4>How do I get paid?</h4>
+						<p>
+							SocialEQ will pay you via Venmo to the email address you provide
+							to us when you setup your account. If you need to change the email
+							address, please get in touch with us at support@socialeq.co.
+						</p>
+						<h4>What are the fees?</h4>
+						<p>SocialEQ has the lowest fees in the business - 70% lower
+							than most! You pay only a flat 10% of the selling price when
+							using SocialEQ.</p>
+						<h4>Are there any other hidden fees?</h4>
+						<p>Venmo may charge you an additional fee when you withdrawal
+							your money. We say 'may' as Venmo has a variety of programs and
+							we have no way of knowing which you are in.</p>
+						<h4>I'm already on (iTunes, CDBaby, Bandcamp, etc.), can I
+							still use you?</h4>
+						<p>Yup! SocialEQ is just another tool in your arsenal to
+							promote yourself and your music and we require no exclusivity.</p>
+						<h4>What if I want to give my music away?</h4>
+						<p>We can do that as well. Giving away music has never been
+							easier.</p>
+						<h3>Social Account and Setup Questions</h3>
+						<h4>What do I need to be able to sell on Facebook?</h4>
+						<p>To sell on Facebook you need:</p>
+						<ul class="standard">
+							<li>A personal Facebook account</li>
+							<li>A <a href="https://www.facebook.com/pages/create/">Facebook
+									Page</a> for yourself / your band
+							</li>
+							<li>An email address (so you can get paid)</li>
+							<li>The rights to sell your music</li>
+						</ul>
+						<p>
+							Once you've got those items you can <a
+								href="https://www.socialeq.co/registration/musician">register</a>
+							right now.
+						</p>
+						<h4>Why do I need to have a Facebook Page?</h4>
+						<p>Facebook's policies dictate that you have a Facebook Page
+							for whichever musician (or record label) if you want to sell. We
+							realize that if you've been on Facebook for awhile you may have
+							started off using your personal page as the touchpoint for your
+							fans as well. We highly recommend creating a Page and promoting
+							it to that audience as Facebook has been pushing for more
+							delineation between personal and professional profiles.</p>
+						<h4>How can a person make a purchase on Facebook?</h4>
+						<p>On Facebook a fan only has to comment on a post with a
+							hashtag you created in SocialEQ to purchase your music. From
+							there SocialEQ will do the rest.</p>
+						<h4>What do I need to be able to sell on Twitter?</h4>
+						<p>To sell on Twitter you need:</p>
+						<ul class="standard">
+							<li>A Twitter account for your band/label</li>
+							<li>An email address so we can pay you</li>
+							<li>The rights to sell your music</li>
+						</ul>
+						<p>
+							Once you've got those items <a
+								href="https://www.socialeq.co/registration/musician">click
+								here</a>to get started.
+						</p>
+						<h4>What if I want to sell on Facebook AND Twitter?</h4>
+						<p>
+							Not a problem! Just make sure you've got the above Facebook and
+							Twitter needs mentioned above and <a
+								href="https://www.socialeq.co/registration/musician">click
+								here.</a>
+						</p>
+						<h4>How can a person make a purchase on Twitter?</h4>
+						<p>On Twitter a fan only has to tweet a hashtag @ your twitter
+							account to purchase your music. You can promote these hashtags
+							live in concert, in Youtube videos, in radio interviews and in
+							print. When a user tweets that #hashtag @youraccount SocialEQ
+							does the rest.</p>
+						<h4>Is there another way to get paid besides Venmo?</h4>
+						<p>Not currently. For the simplicity of being able to sign up
+							and receive credit card payments with just an email address and a
+							few pieces of information, we like Venmo.</p>
+
+						<h3>Technical Questions</h3>
+						<h4>I setup an account using my Facebook/Twitter but now when
+							logging in I'm seeing someone else's name.</h4>
+						<p>This happens if you are on someone else's computer and they
+							are logged into Facebook and/or Twitter. What you need to do is
+							log them out of their account(s) and try again using your own.</p>
+						<h4>How do customers get their music?</h4>
+						<p>If a fan on a mobile phone they are able to immediately
+							stream the music on their device. However, due to restrictions in
+							place by Apple and others they can't immediately download the
+							files to their device. To download your music to their device
+							they have to login to SocialEQ from their desktop computer and
+							sync them to their phone from there.</p>
+						<p>For a fan buying from their desktop computer they just
+							download the files and upload them to the music library
+							management software of their choice.</p>
+						<h4>What music formats do you support?</h4>
+						<p>SocialEQ currently supports mp3, mp4, m4a and m4v files. To
+							keep things simple and compatible with all we recommend using mp3
+							format.</p>
+						<h4>Can I Include My Album Art With My Digital Campaign?</h4>
+						<p>Due to the way Twitter and Facebook handle photos from a
+							single post we only support one image for the campaign image at
+							this time. However, you can upload the front and back image of
+							the album as part of the digital content so that the user will
+							receive it when downloading the album.</p>
+						<h4>How do I get in touch if I have a question or issue?</h4>
+						<p>You can email support@socialeq.co with any questions or
+							issues you have.</p>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div tiles:fragment="about-hero-band">
+
+		<div class="wrapper">
+			<div class="container-fluid">
+				<div class="row">
+				  <div class="col-md-8">
+					<h3>Founding Team</h3>
+				    <div>
+				      <img class="img-thumbnail" style="max-height: 100px;" th:src="@{/resources/images/site/alex-duff.jpg}" />
+				      <h4>Alex Duff</h4>
+				      <h5>Engineering</h5>
+				      <p>
+				        Alex has fifteen years of experience in the technology industry and a passion for 
+				        building and integrating systems. A latecomer to the era of JavaScript everywhere,
+				        the majority of his programming experience has been in Java with a bit of 
+				        SQL and shell scripting mixed in.
+				      </p>
+				      <p>
+				        Currently living in San Fransciso with his wife Katherine, Alex wishes he had more
+				        time to work on his tennis game.
+				      </p>
+				    </div>
+				    <div>
+				      <img class="img-thumbnail" style="max-height: 100px;" th:src="@{/resources/images/site/justin-heikkinen.jpg}" />
+				      <h4>Justin Heikkinen</h4>
+				      <h5>Product</h5>
+				      <p>
+				        A longtime entrepreneur, Justin has worked in mobile technology, payments, marketing, and 
+				        online media during his fifteen year career.  
+				      </p>
+				      <p>
+				        Justin has a BA in Business from the University of Washington and currently lives in Portland.
+				      </p>
+				    </div>
+				  </div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	
+	<div tiles:fragment="sell-on-facebook">
+	  <div class="container-fluid">
+	    <div class="row level-one-band">
+	      <div class="col-xs-1"></div>
+	      <div class="col-xs-10 text-center">
+	        <h1>Now You Can Sell on Facebook</h1>
+	        <h5>
+	           SocialEQ is a platform that lets you sell direct from Facebook in two simple steps: 1) you set the price and
+	           #hashtag for your item, then 2) fans comment with your #hashtag to buy.
+	        </h5>
+	        <a class="btn herobtn" href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Get Started</a>
+	      </div>
+	      <div class="col-xs-1"></div>
+	    </div>
+	    <div class="row row-even product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5">
+		    <h3>Create Your Listing</h3>
+	        <p>
+	          Selling your item on Facebook is easy. Just provide a product image, set the price, and choose the #hashtag that you 
+	          want your fans to use to buy your item. If you're selling digital downloads like music or movies, you'll upload the files. 
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-sm-pull-5 col-md-5 col-md-pull-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/create-facebook-listing.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-odd product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+		    <h3>Show it Off</h3>
+	        <p>
+	          Your fans will see your product on your Facebook page just like any other photo you post. It's your
+	          page, your branding, your image, and your text.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/show-facebook-listing.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-even product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5">
+		    <h3>Make the Sale</h3>
+	        <p>
+	          Fans use your #hashtag in comments to buy and SocialEQ handles the transaction seamlessly. There's no app for users to download and
+	          no software to install. You get paid instantly via Braintree and if you're selling a digital download like music or movies, 
+	          we deliver the files to the buyer instantly. Otherwise we provide you the buyer's shipping address.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-sm-pull-5 col-md-5 col-md-pull-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/make-facebook-sale.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-odd product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+		    <h3>Track Your Results</h3>
+	        <p>
+	          SocialEQ gives you the tools to see your business performance in real time, with statistics
+	          like the number of user replies you've gotten, the number of times
+	          users have repeated your #hashtag, number of sales made and the total sales amount.
+	          You can view this information in a daily or weekly format.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/track-results.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+ 	    <div class="row level-one-band">
+	      <div class="col-xs-1"></div>
+	      <div class="col-xs-10 text-center">
+	        <h1>Start Selling on Facebook</h1>
+	        <a class="btn herobtn" href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Contact Us</a>
+	      </div>
+	      <div class="col-xs-1"></div>
+ 	    </div>
+	  </div>
+	</div>
+
+	<div tiles:fragment="sell-on-twitter">
+	  <div class="container-fluid">
+	    <div class="row level-one-band">
+	      <div class="col-xs-1"></div>
+	      <div class="col-xs-10 text-center">
+	        <h1>Now You Can Sell on Twitter</h1>
+	        <h5>
+	           SocialEQ is a platform that lets you sell direct from Twitter in two simple steps: 1) you set the price and
+	           #hashtag for your item, then 2) anyone can buy just by tweeting you with your #hashtag.
+	        </h5>
+	        <a class="btn herobtn" href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Get Started</a>
+	      </div>
+	      <div class="col-xs-1"></div>
+	    </div>
+	    <div class="row row-even product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5">
+		    <h3>Create Your Listing</h3>
+	        <p>
+	          Selling your item on Twitter is easy. Just provide a product image, set the price, and choose the #hashtag that you 
+	          want your fans to use to buy your item. If you're selling digital downloads like music or movies, you'll upload the files. 
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-sm-pull-5 col-md-5 col-md-pull-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/create-twitter-listing.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-odd product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+		    <h3>Show it Off</h3>
+	        <p>
+	          Your fans will see your product on your Twitter stream along with the #hashag and price. You can also: 1) promote this 
+	          Tweet on Twitter, 2) print this #hashtag on posters, 3) run it on television ads, 4) mention it on the radio, 5) or show it at live 
+	          events.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/show-twitter-listing.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-even product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5">
+		    <h3>Make the Sale</h3>
+	        <p>
+	          Fans Tweet you using your #hashtag to buy and SocialEQ handles the transaction. There's no app to download and
+	          no software to install. You get paid instantly via Braiintree and if you're selling a digital download like music or movies, 
+	          we deliver the files to the buyer instantly. Otherwise we provide you the buyer's shipping address.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-sm-pull-5 col-md-5 col-md-pull-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/make-twitter-sale.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-odd product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+		    <h3>Track Your Results</h3>
+	        <p>
+	          SocialEQ gives you the tools to see your business performance in real time, with statistics
+	          like the number of user replies you've gotten, the number of times
+	          users have repeated your #hashtag, number of sales made and the total sales amount.
+	          You can view this information in a daily or weekly format.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/track-results.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+ 	    <div class="row level-one-band">
+	      <div class="col-xs-1"></div>
+	      <div class="col-xs-10 text-center">
+	        <h1>Start Selling on Twitter</h1>
+	        <a class="btn herobtn" href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Contact Us</a>
+	      </div>
+	      <div class="col-xs-1"></div>
+ 	    </div>
+	  </div>
+	</div>
+
+	<div tiles:fragment="donate">
+	  <div class="container-fluid">
+	    <div class="row level-one-band">
+	      <div class="col-xs-1"></div>
+	      <div class="col-xs-10 text-center">
+	        <h1>Raise Donations Inside Facebook &amp; Twitter</h1>
+	        <h5>
+	           SocialEQ is a platform that lets you raise donations direct from Facebook &amp; Twitter in two simple steps: 1) you set the donation amount and
+	           #hashtag for your campaign, then 2) anyone can donate to you just by repeating your #hashtag.
+	        </h5>
+	        <a class="btn herobtn" href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Get Started</a>
+	      </div>
+	      <div class="col-xs-1"></div>
+	    </div>
+	    <div class="row row-even product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5">
+		    <h3>Create Your Campaign</h3>
+	        <p>
+	          Raising donations inside Facebook &amp; Twitter is easy. Just provide a campaign image, set the donation amount, 
+	          and choose the #hashtag that you want your supporters to use to make a donation. 
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-sm-pull-5 col-md-5 col-md-pull-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/make-donation-drive.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-odd product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+		    <h3>Maximize Exposure</h3>
+	        <p>
+	          Your followers will see your announcement on your Twitter stream along with the #hashag and donation amount. You can also: 1) promote this 
+	          Tweet on Twitter, 2) print this #hashtag on posters, 3) run it on television ads, 4) mention it on the radio, 5) or show it at live 
+	          events.
+	        </p>
+	        <p>
+	          On Facebook, your campaign appears on your page with the image and message you choose. It's your
+	          page, your branding, your image, and your text.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/donation-drive-twitter.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-even product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5">
+		    <h3>Get Donations</h3>
+	        <p>
+	          Supporters Tweet you using your #hashtag to donate. Likewise, Facebook users will comment
+	          on your post. In both cases, SocialEQ will handle the transaction seamlessly. There's no app 
+	          to download and no software to install. Unlike donations you receive via SMS messages from mobile users, 
+	          your charity receives the donation instantly via Braintree.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-sm-pull-5 col-md-5 col-md-pull-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/get-twitter-donation.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-odd product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+		    <h3>Track Your Results</h3>
+	        <p>
+	          SocialEQ gives you the tools to see your fundraising performance in real time, with statistics
+	          like the number of user replies you've gotten across Twitter and Facebook, the number of times
+	          users have repeated your #hashtag, number of donations received and the total donation amount.
+	          You can view this information in a daily or weekly format.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/donations-activity.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+ 	    <div class="row level-one-band">
+	      <div class="col-xs-1"></div>
+	      <div class="col-xs-10 text-center">
+	        <h1>Start Fundraising on Facebook &amp; Twitter</h1>
+	        <a class="btn herobtn" href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Contact Us</a>
+	      </div>
+	      <div class="col-xs-1"></div>
+ 	    </div>
+	  </div>
+	</div>
+	
+	<div tiles:fragment="contests-and-promotions">
+	  <div class="container-fluid">
+	    <div class="row level-one-band">
+	      <div class="col-xs-1"></div>
+	      <div class="col-xs-10 text-center">
+	        <h1>Run Facebook &amp; Twitter Promotions</h1>
+	        <h5>
+	           SocialEQ is a platform that lets you run automated contests inside Facebook &amp; Twitter in two simple steps: 
+	           1) you choose the number of winners and the #hashtag for your campaign, then 2) anyone can enter the contest 
+	           just by repeating your #hashtag.
+	        </h5>
+	        <a class="btn herobtn" href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Get Started</a>
+	      </div>
+	      <div class="col-xs-1"></div>
+	    </div>
+	    <div class="row row-even product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5">
+		    <h3>Create Your Promotion</h3>
+	        <p>
+	          Running a #hashtag-based contest is one of the best ways to get your campaign trending, and
+	          SocialEQ makes it simple for both Facebook &amp; Twitter. Just choose the #hashtag you want 
+	          people to use to participate, tell us the number of winners, and provide a campaign image. 
+	          If the prize is a digital download like music or movies, you'll upload the files.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-sm-pull-5 col-md-5 col-md-pull-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/create-contest.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-odd product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+		    <h3>Get it Trending</h3>
+	        <p>
+	          On Facebook, your campaign appears on your page with the image and message you choose. It's your page, your branding, your image, 
+	          and your text. Since fans repeat the #hashtag to enter the contest, your campaign is sure to start getting attention. 
+	        </p>
+	        <p>
+	          On Twitter, your followers will see your announcement on your stream along with the #hashag. You can also: 
+	          1) promote this Tweet on Twitter, 2) print this #hashtag on posters, 3) run it on television ads, 4) mention 
+	          it on the radio, 5) or show it at live events.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/facebook-contest-entrants.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-even product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5">
+		    <h3>Reward the Winners</h3>
+	        <p>
+	          The contest is fully automated. There's no app for users to download and no software to install. 
+	          SocialEQ picks the winners according to your campaign type. If the prize is a digital 
+	          download like music or movies, we deliver the files to the winners automatically. Otherwise
+	          we provide you the winners' shipping addresses. 
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-sm-pull-5 col-md-5 col-md-pull-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/twitter-contest-winner.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+	    <div class="row row-odd product-information-row">
+	      <div class="col-sm-1"></div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+		    <h3>Track Your Results</h3>
+	        <p>
+	          SocialEQ gives you the tools to see your contest's performance in real time, with statistics
+	          like the number of user replies you've gotten across Twitter and Facebook and the number of times
+	          users have repeated your #hashtag. You can view this information in a daily or weekly format.
+	        </p>
+	      </div>
+	      <div class="col-xs-12 col-sm-5 col-md-5">
+	          <img class="product-illustration img-thumbnail" src="#" th:src="@{/resources/images/site/track-contest-results.png}" />
+	      </div>
+	      <div class="col-sm-1"></div>
+	    </div>
+ 	    <div class="row level-one-band">
+	      <div class="col-xs-1"></div>
+	      <div class="col-xs-10 text-center">
+	        <h1>Start Promoting on Facebook &amp; Twitter</h1>
+	        <a class="btn herobtn" href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Contact Us</a>
+	      </div>
+	      <div class="col-xs-1"></div>
+ 	    </div>
+	  </div>
+	</div>
+		
+	<div tiles:fragment="contact-hero-band">
+
+		<div class="wrapper">
+			<div class="container-fluid">
+				<div class="row">
+					<h4>Contact SocialEQ</h4>
+					<div>
+						<h5>Are you an artist or a business?</h5>
+						<p>
+							Want to start selling or running promotions on Facebook &amp; Twitter?  We need to set you up first. 
+							<a href="#" th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">Contact us</a> to learn more!
+						</p>
+						<h5>Got a general question or suggestion?</h5>
+						<p>
+							<a href="#" th:href="${'mailto:sales@socialeq.co?subject=General%20Information&amp;body='}">Send us an email</a>.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+
+
+	<div tiles:fragment="bannerbg-band">
+		<div class="container-fluid">
+			<div class="row">
+				<h3 class="bannertext">SocialEQ &mdash; sales and promotions on Twitter &amp; Facebook via #hashtags</h3>
+			</div>
+		</div>
+	</div>
+	
+	<div tiles:fragment="maintenance">
+		<div class="container-fluid">
+				<div class="center-block">
+					<h1>#UHOH</h1>
+					<p>Something's gone wrong. We are looking into it!</p>
+				</div>
+		</div>
+	</div>	
+	
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+	
+		<h1 class="musician-registration-h1">Sell Music Fan Direct</h1>
+		<h2 class="musician-registration-h2">SocialEQ is the Lowest Fee Platform</h2>
+
+		<div class="text-center">
+		  <a href="#" th:href="@{/registration/confirmFacebookPermissions}">
+		    <button class="btn musician-startsell">Start Selling Today</button>
+		  </a>
+		</div>
+		
+		<div class="modal fade">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title">Modal title</h4>
+		      </div>
+		      <div class="modal-body">
+		        <p>Start the registration process here. To get registered and offer your 
+				digital music for sale via SocialEQ, you'll need to do the following:</p>
+				
+				<ol>
+				  <li>Link SocialEQ with the social accounts that you want to enable selling in-stream</li>
+				  <li>Accept the SocialEQ Terms and Conditions</li>
+				  <li>Tell us the email address where we can let you know when you make a sale</li>
+				  <li>Upload your digital music files in MP3 or M4A format</li>
+				  <li>Upload your album artwork of at least 300 x 300 resolution</li>
+				</ol>
+				
+				<p>Don't worry, we'll guide you through the process.</p>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-primary">Save changes</button>
+		      </div>
+		    </div><!-- /.modal-content -->
+		  </div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+
+		
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+			
+		    $( document ).ready(function() {
+			    var html = $("html");
+			    html.addClass( "musician-registration-html" );
+			    
+			    var body = $("body");
+			    body.addClass( "musician-registration-body" );
+		    });
+					
+		/*]]>*/
+		</script>
+		
+	</div>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	th:with="activePage='sale.listingHistory',
+			 isUserLoggedIn=${not #strings.containsIgnoreCase(#authentication.name, 'anonymousUser')}">
+
+	<div tiles:fragment="body">
+	  <div class="col-xs-1"></div>
+	  <div class="col-xs-10">
+		<div th:if="${page.totalElements == 0 }">
+			<h2 th:text="#{listing.transactionHistory.h2.headline}">Payment History</h2>
+	        <p>You don't have any completed transactions. In the future, this page will show the date, amount, and payee of your past purchases and prizes.</p>
+		</div>
+		
+		<div th:if="${page.totalElements > 0}">
+			<h2 th:text="#{listing.transactionHistory.h2.headline}">Transaction History</h2>
+	        <p th:inline="text">Total number of transactions: [[${page.totalElements}]]</p>
+	          
+	        <table class="table table-striped">
+	         <thead>
+	         	<tr>
+				  <th th:text="#{listing.transactionHistory.table.heading.status}">Status</th>
+				  <th th:text="#{listing.transactionHistory.table.heading.payer}">Recipient</th>
+				  <th th:text="#{listing.transactionHistory.table.heading.payee}">Campaign Owner</th>
+				  <th th:text="#{listing.transactionHistory.table.heading.amount}">Total</th>
+            	  <th th:text="#{listing.transactionHistory.table.heading.item}">Item</th>
+	         	</tr>
+	         </thead>
+	         
+	         <tbody>
+	          <tr th:each="payment : ${page.content}" th:unless="${page.totalElements == 0}">
+	            <td><a href="#" th:href="@{'../transactionDetail/' + ${payment.id}}"><span th:text="${payment.screenFormattedStatus}">PENDING ADDRESS | COMPLETED</span></a></td>
+	            <td th:text="${#strings.replace(payment.payer.username,'twitter/','@')}">Payer username</td>
+	            <td th:text="${#strings.replace(payment.payee.username,'twitter/','@')}">Payee username</td>
+	            <td th:if="${payment.totalAmount}">$ <span th:text="${#numbers.formatDecimal(payment.totalAmount, 0, 'COMMA', 2, 'POINT')}">1.99</span></td>
+	            <td th:unless="${payment.totalAmount}">Free</td>
+	            <td><a href="#" th:href="@{'../listingDetail/' + ${payment.listing.id}}"><span th:text="${payment.listing.id}">Listing Id</span></a></td>
+	          </tr>
+	         </tbody>
+	        </table>
+				
+			<div tiles:include="pagination"></div>
+		  </div>
+		  <div class="col-xs-1"></div>
+		</div>
+	</div><!-- body-fragment -->
+
+</html>
+	            

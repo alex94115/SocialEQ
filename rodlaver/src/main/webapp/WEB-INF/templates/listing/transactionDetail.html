@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+	  
+	  <div style="padding-top: 10px;"><!-- outer content div -->
+	  
+	    <div id="payment-detail">
+	  
+	  		<div class="col-xs-1 visible-xs"></div>
+		    <div class="col-xs-10 col-sm-3"><!-- top row first column -->
+		      
+		      <div class="order-level">
+		        <span class="top-text" th:text="#{payment.detail.label.orderDate}">Transaction Date</span>
+				<h4 th:text="${#dates.format(paymentInfo.created, 'MMMMM dd, yyyy')}">April 23, 2014</h4>
+
+				<ul class="order-details">
+
+					<li>
+					  <span class="info-title" th:text="#{payment.detail.label.paymentId}">Order #</span>
+					  <span class="info-data" th:text="${paymentInfo.id}">
+					  </span>
+					</li>
+					<li th:if="${#strings.containsIgnoreCase(paymentInfo.listing.type,'SELLING')}">
+					  <span class="info-title">Buyer</span> 
+					  <span class="info-data recipient"  th:text="${paymentInfo.payer.screenFormattedUsername}">Buyer Screen Name</span>
+					</li>
+					<li th:if="${#strings.containsIgnoreCase(paymentInfo.listing.type,'CAMPAIGN')}">
+					  <span class="info-title">Winner</span> 
+					  <span class="info-data recipient"  th:text="${paymentInfo.payer.screenFormattedUsername}">Winner Screen Name</span>
+					</li>
+					
+					<li class="address" th:if="${listingIsPhysical and doesPaymentHaveShippingAddress}">
+					  <span class="info-title">Shipping Address</span> 
+					  <span class="info-data info-block" th:object="${paymentInfo.shippingAddress}"> 
+					    <br />
+						<span th:if="${isVerified}" class="label label-info">Verified<br/></span>
+						<span th:unless="${isVerified}" class="label label-info">Unverified</span><br/>
+						<span th:text="${paymentInfo.payer.firstName} + ' ' + ${paymentInfo.payer.lastName}">Some Buyer</span>
+						<br/>
+						<span th:text="*{firstLine}">123 Main St</span>
+						<br th:if="*{firstLine}" />
+						<span th:if="${not #strings.isEmpty( paymentInfo.shippingAddress.secondLine )}" 
+						      th:text="*{secondLine}">Second Line</span>
+						<span th:unless="${#strings.isEmpty( paymentInfo.shippingAddress.secondLine )}"><br/></span>
+						<span th:if="${not #strings.isEmpty( paymentInfo.shippingAddress.thirdLine )}" 
+						      th:text="*{thirdLine}">Third Line</span>
+						<span th:unless="${#strings.isEmpty( paymentInfo.shippingAddress.thirdLine )}"><br/></span>
+						<span th:text="*{city} + ', ' + *{state} + ' ' + *{zip}">City, XX 00000</span><br/>
+						<span th:text="*{countryDecode}">United States</span><br/>
+						<br />
+					  </span>
+					</li>
+					<li th:if="${paymentInfo.totalAmount}" >
+					  <span class="info-title" th:text="#{payment.detail.label.totalAmount}">Total</span> 
+					  <span class="price" th:text="'$' + ${#numbers.formatDecimal(paymentInfo.totalAmount, 0, 'COMMA', 2, 'POINT')}">$36.99</span>
+					</li>
+				</ul>
+		      </div>
+		    </div><!-- end top row first column -->
+		    <div class="col-xs-1 visible-xs"></div>
+            <div class="clearfix visible-xs"></div>
+		    
+		    <div class="col-xs-1 visible-xs"></div>
+		    <div class="col-xs-10 col-sm-9"><!-- top row second column -->
+		      <div id="order-bar">
+		        <div id="ship-contain">
+		          <div class="status first-shipment">
+		            <span class="info-title">Status</span>
+		            <h4 th:text="${paymentInfo.screenFormattedStatus}">Transaction Status</h4>
+		          </div>
+		        </div>
+		      </div>
+		    </div><!-- end top row second column -->
+		    <div class="col-xs-1 visible-xs"></div>
+            <div class="clearfix visible-xs"></div>
+		    
+		    <div class="col-xs-1 visible-xs"></div>
+		    <div class="col-xs-10 col-sm-3"><!-- second column second row -->
+		      <div id="order-bar">
+		        <div id="ship-contain">
+		          <div class="ship-listing first-shipment">
+		            <ul class="shipment en-ss-margin">
+					  <li>
+					    <span class="image-box"> 
+					      <a href="#" th:href="@{'../listingDetail/' + ${paymentInfo.listing.id}}">
+						    <img src="#" th:src="${cloudfrontPublicBaseUrl + paymentInfo.listing.imageFilename}" width="100"
+									   th:alt="${paymentInfo.listing.title}"
+									   th:title="${paymentInfo.listing.title}"
+									   height="100" 
+									   border="0" />
+						  </a>
+						</span> 
+						<span class="item-title" th:text="${paymentInfo.listing.title}">Listing Title</span>
+
+						<div class="seller">
+						  <span th:if="${#strings.containsIgnoreCase(paymentInfo.listing.type,'SELLING')}">Sold by</span>
+						  <span th:if="${#strings.containsIgnoreCase(paymentInfo.listing.type,'CAMPAIGN')}">Offered by</span> 
+						  <span th:text="${paymentInfo.payee.screenFormattedUsername}">Seller Name</span>
+						  <div th:if="${sellerTwitterProfileUrl}">
+						    <a href="#" th:href="${sellerTwitterProfileUrl}" class="twitter-follow-button" data-show-count="true" data-size="medium" data-show-screen-name="false">Follow on twitter</a>
+					      </div>
+					      <div th:if="${sellerFacebookPageUrl}">
+					    	<div class="fb-like" th:data-href="${sellerFacebookPageUrl}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
+						  </div>
+						</div>
+						
+					   </li>
+
+					 </ul>
+		           </div>
+		         </div>
+		       </div><!--  /order-bar -->
+		    </div><!-- end second column second row -->
+		    <div class="col-xs-1 visible-xs"></div>
+            <div class="clearfix visible-xs"></div>
+		    
+		    <div class="col-xs-1 visible-xs"></div>
+		    <div class="col-xs-10 col-sm-6"><!-- button column -->
+
+		      <div>
+				<div th:unless="${#strings.containsIgnoreCase(paymentInfo.listing.type,'CAMPAIGN') or 
+								 #strings.containsIgnoreCase(paymentInfo.screenFormattedStatus,'Payment Failed')}">
+		          <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Payment Complete</button>
+                  <br />
+		        </div>
+		        
+		        <div th:unless="${#strings.containsIgnoreCase(paymentInfo.listing.type,'CAMPAIGN')}" 
+		             th:if="${#strings.containsIgnoreCase(paymentInfo.screenFormattedStatus,'Payment Failed')}">
+		          <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Payment Failed</button>
+                  <br />
+		        </div>
+		        
+		        <div th:if="${#strings.containsIgnoreCase(paymentInfo.listing.type,'CAMPAIGN')}">
+		          <div>
+		            <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Won Giveaway!</button>
+                    <br />
+                  </div>
+		        </div>
+		        
+		      </div>
+
+		        
+		      <div th:if="${userIsBuyer}">
+
+		        <div th:if="${#strings.containsIgnoreCase(paymentInfo.screenFormattedStatus,'Pending Shipping Address')}">
+		          <button id="showInputAddressModal" type="button" class="btn btn-primary btn-large payment-detail-button">Set Shipping Address</button>
+                  <br />
+                </div>
+                
+                <div th:if="${listingIsPhysical} and ${paymentInfo.shippingAddress}">
+		          <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Shipping Address Set</button>
+                  <br />
+                </div>
+                  
+                <div th:if="${listingIsPhysical and #strings.containsIgnoreCase(paymentInfo.screenFormattedStatus,'Pending Shipment')}">
+                  <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Pending Shipment</button>
+                  <br />
+                </div>
+                
+                <div th:if="${listingIsDigital}">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+	  			      <h3 class="panel-title">View Your Files</h3>
+		 		    </div>
+				    <div class="panel-body">
+				      <div th:each="contentFile : ${paymentInfo.listing.contentFiles}" style="margin-bottom: 20px;">
+					    <p><strong th:text="${contentFile.digitalContentOriginalFilename}">Filename</strong></p>
+					    <audio th:if="${contentFile.isAudioFile}" controls="controls">
+					      <source th:src="@{${contentFile.cloudFrontUrl}}" th:type="${contentFile.digitalContentType}" />
+					    </audio>
+					    <video th:if="${contentFile.isVideoFile}" controls="controls">
+					      <source th:src="@{${contentFile.cloudFrontUrl}}" th:type="${contentFile.digitalContentType}" />
+					    </video>
+	                  </div>
+				    </div>
+				  </div>
+				
+				  <button id="fileDownloadButton" 
+                    type="button" class="btn btn-primary btn-large payment-detail-button">Download All Files</button>
+                
+                  <div th:if="${listingIsDigital}" th:each="contentFile : ${paymentInfo.listing.contentFiles}">
+                    <a th:href="@{'/listing/downloadPurchase/'(name=${contentFile.contentFilename})}"
+                       class="hide multi-download">download</a>                  
+                  </div>
+				</div>
+                
+                <div th:if="${listingIsVoucher}">
+                  
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+	  			      <h3 class="panel-title">Your Vouchers</h3>
+		 		    </div>
+				    <div class="panel-body">
+                      <div th:each="voucher : ${paymentInfo.vouchers}">
+                    
+                        <div th:if="${#strings.equalsIgnoreCase(voucher.currentEffectiveVoucherStatus.status,'UNREDEEMED')}">
+	                      <a th:href="${voucher.cloudFrontUrl}" th:text="${voucher.filename}">Voucher file</a>
+	                    </div>
+	                
+	                    <div th:if="${#strings.equalsIgnoreCase(voucher.currentEffectiveVoucherStatus.status,'REDEEMED')}">
+                          <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Voucher Redeemed</button>
+                          <br />
+                        </div>
+                    
+                        <div th:if="${#strings.equalsIgnoreCase(voucher.currentEffectiveVoucherStatus.status,'REVOKED')}">
+                          <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Voucher Expired</button>
+                          <br />
+                        </div>
+	              
+	                  </div>
+	                </div>
+	              </div>
+                
+				</div>
+				
+		      </div>
+              
+              
+              <div th:if="${userIsSeller}">
+		        
+		        <button th:if="${#strings.containsIgnoreCase(paymentInfo.screenFormattedStatus,'Processing Payment')}"
+                	type="button" class="btn btn-default btn-large payment-detail-button" disabled="disabled">Awaiting Payment Completion</button>
+		        
+		        
+		        <div th:if="${listingIsDigital}">
+		          <div th:if="${#strings.containsIgnoreCase(paymentInfo.listing.type,'CAMPAIGN')}">
+                    <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Download Enabled for Winner</button>
+                    <br/>
+                  </div>
+                  <div th:if="${#strings.containsIgnoreCase(paymentInfo.listing.type,'SELLING')}">
+                    <button  type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Download Enabled for Buyer</button>
+                    <br/>
+                  </div>
+                </div>
+                
+                <div th:if="${listingIsPhysical}">
+                
+                  <div th:if="${#strings.containsIgnoreCase(paymentInfo.screenFormattedStatus,'Pending Shipping Address')}">
+                    <button  type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Awaiting User Shipping Address</button>
+                    <br/>
+                  </div>
+                
+                  <div th:if="${#strings.containsIgnoreCase(paymentInfo.screenFormattedStatus,'Pending Shipment')}">
+
+                    <button  type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Pending Shipment</button>
+                    <br/>
+
+					<form role="form" th:action="@{'../setIsShipped/' + ${paymentInfo.id}}" method="POST">
+                      <button type="submit" class="btn btn-primary btn-large payment-detail-button">Mark as Shipped</button>
+                    </form>
+                    <br/>
+
+                  </div>
+
+                  <div th:if="${#strings.containsIgnoreCase(paymentInfo.screenFormattedStatus,'Completed')}">
+                    <button  type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Item Shipped</button>
+                  </div>
+                
+                </div>
+                
+                <div th:if="${listingIsVoucher}">
+
+			      <div th:if="${#strings.equalsIgnoreCase(currentVoucherStatus,'UNREDEEMED')}">
+                    <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Voucner Unredeemed</button>
+                    <br />
+                  </div>
+                  
+                  <div th:if="${#strings.equalsIgnoreCase(currentVoucherStatus,'REDEEMED')}">
+                    <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Voucher Redeemed</button>
+                    <br />
+                  </div>
+
+                  <div th:if="${#strings.equalsIgnoreCase(currentVoucherStatus,'REVOKED') or #strings.equalsIgnoreCase(currentVoucherStatus,'EXPIRED') }">
+                    <button type="button" class="btn btn-primary btn-large payment-detail-button" disabled="disabled">Voucher Expired</button>
+                    <br />
+                  </div>
+
+			    </div>
+              
+              </div>
+              
+		    <div class="clearfix visible-sm"></div>
+		  
+		   </div><!-- end button column -->
+		   <div class="col-xs-1 visible-xs"></div>
+           <div class="clearfix visible-xs"></div>
+		    
+		  </div><!-- end payment-detail -->
+
+		  <div class="col-xs-1"></div>
+		
+		</div><!-- end of outer content div -->
+
+        <div class="modal fade" id="shipping-address-modal" tabindex="-1" role="dialog" aria-labelledby="shipping-address-modal-label" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+			  <div class="modal-header">
+			    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			    <h4 th:text="#{payment.detail.shippingAddress.headline}" id="shipping-address-modal-label">Set Shipping Address</h4>
+			  </div>
+			 
+			  <div class="modal-body">
+			  
+			    <div class="panel-group" id="accordion">
+				  <div class="panel panel-default" th:if="${buyerAddresses}">
+				    <div class="panel-heading">
+				      <h4 class="panel-title">
+				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">Use Existing Address</a>
+				      </h4>
+				    </div>
+				    <div id="collapseOne" class="panel-collapse collapse in">
+				      <div class="panel-body">
+				        <form role="form" id="existingAddress" th:action="@{postBuyerAddress}" method="POST">
+				          <div th:each="address : ${buyerAddresses}">
+					        <div class="radio">
+							  <label>
+							    <input type="radio" name="existingAddressRadio" th:id="${address.id}" th:value="${address.id}" />
+							    <span th:text="${address.compactFormat}"></span>
+							  </label>
+							</div>
+						  </div>
+					      <input type="hidden" name="paymentId" th:value="${paymentInfo.id}"  />
+						</form>
+						
+				      </div>
+				    </div>
+				  </div>
+				  <div class="panel panel-default">
+				    <div class="panel-heading">
+				      <h4 class="panel-title">
+				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">Add New Address</a>
+				      </h4>
+				    </div>
+				    <div id="collapseTwo" th:class="${buyerAddresses} ? 'panel-collapse collapse' : 'panel-collapse collapse in'">
+				      <div class="panel-body">
+				        
+		     			<!-- The async form to send and replace the modal's content with its response -->
+					    <form role="form" id="addressData" th:action="@{postBuyerAddress}" method="POST">
+						  <div class="row" id="inputShippingAddress">
+						    <div class="col-xs-12">
+						    
+						        <div class="form-group has-error bg-danger" id="addressNotFound">
+								  <button type="button" class="close" aria-hidden="true" data-dismiss="alert">&times;</button>
+								  <strong>Error:</strong>
+								  <p>We couldn't find that address. Please double check it and try again.</p>
+							    </div>
+						    
+						        <div class="form-group">
+								    <label class="control-label">Recipient:</label>
+								    <div>
+								      <p class="form-control-static" 
+								      	  th:text="${paymentInfo.payer.firstName + ' ' + paymentInfo.payer.lastName}">First Last</p>
+								    </div>
+								</div>
+					        	
+								<div class="form-group">
+								  <div class="row">
+								    <div class="col-xs-10">
+									  <label class="control-label" id="firstLine-error-div" th:text="#{payment.detail.shippingAddress.form.error.firstLine}">Invalid First Line</label>
+									  <input type="text" class="form-control" name="firstLine" id="firstLine" placeholder="First Line of Address" /> 
+									</div>
+								  </div>	
+								</div>
+				
+								<div class="form-group">
+								  <div class="row">
+								    <div class="col-xs-10">
+									  <label class="control-label" id="secondLine-error-div" th:text="#{payment.detail.shippingAddress.form.error.secondLine}">Invalid Second Line</label>
+									  <input type="text" class="form-control" name="secondLine" id="secondLine" placeholder="Second Line of Address" />
+									</div>
+								  </div>	
+								</div>
+				
+								<div class="form-group" >
+								  <div class="row">
+								    <div class="col-xs-10">
+									  <label class="control-label" id="thirdLine-error-div" th:text="#{payment.detail.shippingAddress.form.error.thirdLine}">Invalid Third Line</label>
+									  <input type="text" class="form-control" name="thirdLine" id="thirdLine" th:value="${#object.thirdLine}" placeholder="Third Line of Address" />
+									</div>
+								  </div>	
+								</div>
+				
+								<div class="form-group" >
+								  <div class="row">
+								    <div class="col-xs-6">
+									  <label class="control-label" id="city-error-div" th:text="#{payment.detail.shippingAddress.form.error.city}">Invalid City</label>
+									  <input type="text" class="form-control" name="city" id="city" th:value="${#object.city}" placeholder="City" />
+									</div>
+								  </div>	
+								</div>
+							
+								<div class="form-group" >
+								  <div class="row">
+								    <div class="col-xs-4">
+								      <label class="control-label" id="state-error-div" th:text="#{payment.detail.shippingAddress.form.error.state}">Invalid State or Province</label>
+									  <input type="text" class="form-control" name="state" id="state" th:value="${#object.state}" placeholder="State or Province" />
+									</div>
+								  </div>	
+								</div>
+									
+								<div class="form-group" >
+								  <div class="row">
+								    <div class="col-xs-4">
+								      <label class="control-label" id="zip-error-div" th:text="#{payment.detail.shippingAddress.form.error.zip}">Invalid Zip or Postcode</label>
+									  <input type="text" class="form-control" name="zip" id="zip" th:value="${#object.zip}" placeholder="Zip or Postcode" />
+									</div>
+								  </div>	
+								</div>
+								
+								<div class="form-group" >
+									<label class="control-label" id="country-error-div" th:text="#{payment.detail.shippingAddress.form.error.country}">Invalid Country</label>								
+									<select name="country" id="country">
+									  <option th:each="country : ${countryList}" 
+									          th:value="${country.key}" 
+									          th:text="${country.value}">Country</option>
+									</select>
+								</div>
+								
+								<input type="hidden" name="paymentId" th:value="${paymentInfo.id}"  />
+							</div>
+						  </div>
+						  <div class="row" id="addressSuggestion">
+						    <div class="col-xs-12">
+						      <div class="row">
+						        <div class="col-xs-4">
+						          <p>You entered:</p>
+						        </div>
+						        <div class="col-xs-8">
+						          <label id="userAddressLabel">
+							      </label>
+						        </div>
+						      </div>
+						      <div class="row">
+						        <div class="col-xs-4">
+						          <p>We suggest:</p>
+						        </div>
+						        <div class="col-xs-8">
+						          <label id="suggestedAddressLabel">
+							      </label>
+						        </div>
+						      </div>
+							    
+							</div>
+						  </div>
+					    </form>
+				        
+				        
+				      </div>
+				    </div>
+				  </div>
+				</div><!-- end panel -->
+			    
+			  
+			  </div><!-- modal-body -->
+			 
+			  <div class="modal-footer">
+			    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			  	<input id="validateAddressButton" class="btn btn-primary" value="Set Address" type="button"/>
+			  	<input id="submitAddressButton" class="btn btn-primary" value="Set Address" type="button"/>
+			  </div>
+			</div>
+		  </div>
+		</div>					
+		<!-- end shipping address entry -->
+		
+		<!-- download explanation modal -->
+		<div class="modal fade" id="downloadExplanationModal" tabindex="-1" role="dialog" aria-labelledby="downloadExplanationModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title" id="downloadExplanationModalLabel">Downloading Content</h4>
+		      </div>
+		      <div class="modal-body">
+		        <p>Because of limitations of mobile devices, you cannot download files right now.</p>
+		        <p>
+		          <strong>Don't worry!</strong> Your files are stored in your account and you will be able to download them 
+		          any time from a computer just by returning to this page.
+		        </p>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		
+		<script src="#" th:src="@{/resources/js/transaction-detail.js}"></script>
+		
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+		     
+		// initialize twitter widget.js
+		window.twttr = (function (d, s, id) {
+		  var t, js, fjs = d.getElementsByTagName(s)[0];
+		  if (d.getElementById(id)) return;
+		  js = d.createElement(s); js.id = id; js.src= "https://platform.twitter.com/widgets.js";
+		  fjs.parentNode.insertBefore(js, fjs);
+		  return window.twttr || (t = { _e: [], ready: function (f) { t._e.push(f) } });
+		}(document, "script", "twitter-wjs"));
+		    	 
+		     
+		/*]]>*/
+		</script>
+		
+	</div><!--/body-fragment-->		
+
+</html>

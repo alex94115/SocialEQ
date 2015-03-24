@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:tiles="http://www.thymeleaf.org">
+
+        <div tiles:fragment="body">
+        
+			<p>If this page does not automatically redirect, click <a href="#" th:href="@{${returnHref}}">here</a> to continue.</p>
+			
+			
+			<script th:inline="javascript">
+			/*<![CDATA[*/
+			           
+			   var redirectUrl = /*[[@{${returnHref}}]]*/;
+		     
+			   if( window !== top ) {
+			       top.location.replace( redirectUrl );
+			   } else {
+			       location.replace( redirectUrl );
+			   }
+		
+			/*]]>*/
+			</script>
+        </div><!--/body-fragment-->
+
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:tiles="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org"
+      lang="en">
+
+<head tiles:include="header" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#"></head>
+
+<body>
+	
+	<span tiles:include="scripts"></span>
+
+	<div class="row" tiles:include="homepage-topnav"></div>
+
+	<div tiles:include="primary-page-content"></div>
+
+    <div class="band footer">
+		  <div class="container" tiles:include="footer-band"></div>
+    </div>
+    
+</body>
+</html>

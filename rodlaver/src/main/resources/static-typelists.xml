@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+       	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       	xmlns:p="http://www.springframework.org/schema/p" 
+       	xmlns:aop="http://www.springframework.org/schema/aop"
+    	xmlns:util="http://www.springframework.org/schema/util"
+       	xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+			
+	<util:map id="countryList" map-class="java.util.LinkedHashMap">
+		<entry key="US" value="United States" /> 
+	    <entry key="AU" value="Australia" /> 
+	    <entry key="BR" value="Brazil" /> 
+	    <entry key="CA" value="Canada" /> 
+	    <entry key="CN" value="China" /> 
+	    <entry key="FR" value="France" /> 
+	    <entry key="DE" value="Germany" /> 
+	    <entry key="HK" value="Hong Kong" /> 
+	    <entry key="IT" value="Italy" /> 
+	    <entry key="JP" value="Japan" /> 
+	    <entry key="MX" value="Mexico" />
+	    <entry key="NL" value="Netherlands" /> 
+	    <entry key="NZ" value="New Zealand" /> 
+	    <entry key="RU" value="Russia" />
+	    <entry key="SG" value="Singapore" /> 
+	    <entry key="ES" value="Spain" /> 
+	    <entry key="TR" value="Turkey" /> 
+	    <entry key="GB" value="United Kingdom" />
+	</util:map>
+
+	<util:map id="stateList" map-class="java.util.LinkedHashMap">
+		<entry key="default" value="Select One..."/>
+		<entry key="AL" value="Alabama"/>
+		<entry key="AK" value="Alaska"/>
+		<entry key="AZ" value="Arizona"/>
+		<entry key="AR" value="Arkansas"/>
+		<entry key="CA" value="California"/>
+		<entry key="CO" value="Colorado"/>
+		<entry key="CT" value="Connecticut"/>
+		<entry key="DE" value="Delaware"/>
+		<entry key="DC" value="District Of Columbia"/>
+		<entry key="FL" value="Florida"/>
+		<entry key="GA" value="Georgia"/>
+		<entry key="HI" value="Hawaii"/>
+		<entry key="ID" value="Idaho"/>
+		<entry key="IL" value="Illinois"/>
+		<entry key="IN" value="Indiana"/>
+		<entry key="IA" value="Iowa"/>
+		<entry key="KS" value="Kansas"/>
+		<entry key="KY" value="Kentucky"/>
+		<entry key="LA" value="Louisiana"/>
+		<entry key="ME" value="Maine"/>
+		<entry key="MD" value="Maryland"/>
+		<entry key="MA" value="Massachusetts"/>
+		<entry key="MI" value="Michigan"/>
+		<entry key="MN" value="Minnesota"/>
+		<entry key="MS" value="Mississippi"/>
+		<entry key="MO" value="Missouri"/>
+		<entry key="MT" value="Montana"/>
+		<entry key="NE" value="Nebraska"/>
+		<entry key="NV" value="Nevada"/>
+		<entry key="NH" value="New Hampshire"/>
+		<entry key="NJ" value="New Jersey"/>
+		<entry key="NM" value="New Mexico"/>
+		<entry key="NY" value="New York"/>
+		<entry key="NC" value="North Carolina"/>
+		<entry key="ND" value="North Dakota"/>
+		<entry key="OH" value="Ohio"/>
+		<entry key="OK" value="Oklahoma"/>
+		<entry key="OR" value="Oregon"/>
+		<entry key="PA" value="Pennsylvania"/>
+		<entry key="RI" value="Rhode Island"/>
+		<entry key="SC" value="South Carolina"/>
+		<entry key="SD" value="South Dakota"/>
+		<entry key="TN" value="Tennessee"/>
+		<entry key="TX" value="Texas"/>
+		<entry key="UT" value="Utah"/>
+		<entry key="VT" value="Vermont"/>
+		<entry key="VA" value="Virginia"/>
+		<entry key="WA" value="Washington"/>
+		<entry key="WV" value="West Virginia"/>
+		<entry key="WI" value="Wisconsin"/>
+		<entry key="WY" value="Wyoming"/>
+		<entry key="PR" value="Puerto Rico"/>
+		<entry key="VI" value="Virgin Islands"/>
+		<entry key="MP" value="Northern Mariana Islands"/>
+		<entry key="GU" value="Guam"/>
+		<entry key="AS" value="American Samoa"/>
+		<entry key="PW" value="Palau"/>
+		<entry key="AA" value="Armed Forces (AA)"/>
+		<entry key="AE" value="Armed Forces (AE)"/>
+		<entry key="AP" value="Armed Forces (AP)"/>
+	</util:map>
+
+</beans>

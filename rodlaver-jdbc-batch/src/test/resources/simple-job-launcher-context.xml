@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<import resource="classpath:/data-source-context.xml" />
+	
+	<context:component-scan base-package="com.projectlaver" />
+	<context:property-placeholder />
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<constructor-arg ref="dataSource" />
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="messages" />
+	</bean>
+
+	<bean id="jobLauncher"
+		class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+		<property name="jobRepository" ref="jobRepository" />
+	</bean>
+
+	<bean class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+		<property name="jobRegistry" ref="jobRegistry"/>
+	</bean>
+
+	<bean id="jobRepository"
+		class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean" 
+		p:isolationLevelForCreate = "${batch.isolationlevel}"
+		p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager" p:lobHandler-ref="lobHandler"/>
+
+	<bean id="mapJobRepository"
+		class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean"
+		lazy-init="true" autowire-candidate="false" />
+
+	<bean id="jobOperator"
+		class="org.springframework.batch.core.launch.support.SimpleJobOperator"
+		p:jobLauncher-ref="jobLauncher" p:jobExplorer-ref="jobExplorer"
+		p:jobRepository-ref="jobRepository" p:jobRegistry-ref="jobRegistry" />
+
+	<bean id="jobExplorer"
+		class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean"
+		p:dataSource-ref="dataSource" />
+
+	<bean id="jobRegistry"
+		class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+
+	<!-- State Change Communication Beans -->
+
+	<!--  Buyers -->
+	<bean id="buyerPendingUserRegistration" class="com.projectlaver.batch.communication.BuyerPendingUserRegistration" />
+	<bean id="buyerFailedInactiveSale" class="com.projectlaver.batch.communication.BuyerFailedInactiveSale" />
+	<bean id="buyerNonPhysicalPaymentCompleted" class="com.projectlaver.batch.communication.BuyerNonPhysicalPaymentCompleted" />
+	<bean id="buyerCampaignOptInCompleted" class="com.projectlaver.batch.communication.BuyerWonGiveaway" />
+	<bean id="buyerFailedSoldOut" class="com.projectlaver.batch.communication.BuyerFailedSoldOut" />
+	<bean id="BuyerFailedDuplicatePurchase" class="com.projectlaver.batch.communication.BuyerFailedDuplicatePurchase" />
+	<bean id="buyerPendingMeansOfPayment" class="com.projectlaver.batch.communication.BuyerPendingMeansOfPayment" />
+	<bean id="buyerPaymentPending" class="com.projectlaver.batch.communication.BuyerPaymentPending" />
+	<bean id="buyerPendingShipment" class="com.projectlaver.batch.communication.BuyerPendingShipment" />
+	<bean id="buyerPendingShippingAddress" class="com.projectlaver.batch.communication.BuyerPendingShippingAddress" />
+	<bean id="buyerPhysicalPurchaseShipped" class="com.projectlaver.batch.communication.BuyerPhysicalPurchaseShipped" />
+	<bean id="buyerPaymentFailed" class="com.projectlaver.batch.communication.BuyerPaymentFailed" />
+	
+	<!--  Either						  -->
+	<bean id="noCommunicationRequired" class="com.projectlaver.batch.communication.NoCommunicationRequired" />
+	
+	<!-- Payment Provider -->
+	<bean id="paymentProvider" class="com.projectlaver.util.BraintreePaymentProvider"></bean>
+	
+	<!-- Braintree Gateway -->
+	<bean id="braintreeGateway" class="com.braintreegateway.BraintreeGateway">
+		<constructor-arg index="0" ref="braintreeEnvironment" />
+		<constructor-arg index="1" type="java.lang.String" value="${braintree.merchantId}" />
+		<constructor-arg index="2" type="java.lang.String" value="${braintree.publicKey}" />
+		<constructor-arg index="3" type="java.lang.String" value="${braintree.privateKey}" />
+	</bean>
+	
+	<util:constant id="braintreeEnvironment" static-field="${braintree.environment}" />
+	
+	
+</beans>

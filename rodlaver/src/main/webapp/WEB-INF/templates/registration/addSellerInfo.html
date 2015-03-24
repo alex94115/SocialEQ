@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+	
+	  <div id="registration-wrapper">
+				  
+	    <div class="row">
+	      <div class="col-sm-12">
+	        <div class="headline">
+	          <h1>We Need Some Details About You</h1>
+	          <h2>So that we can send you money when buyers purchase your items, we need some more information.</h2>
+	        </div>
+	      </div>
+	    </div>
+	      
+	    <div class="row">
+	      <div class="col-sm-8">
+		
+			<p>
+			  We need this data to set you up to receive payments. This information is only provided to our 
+			  payment processor for the specific purpose of making payments to you and will never be shared 
+			  with any other party for marketing or any other reason. 
+			</p>
+			
+			<p>
+				By clicking the button below, you agree that you have read and accepted the Braintree merchant
+				<a href="#" th:href="@{/braintreeMerchantTerms}">Terms and Conditions</a>
+			</p>
+			
+			<form role="form"
+				  class="form-horizontal"
+			      action="#" 
+		          th:action="@{/registration/submitSellerInfo}"
+		          th:object="${sellerInfoForm}"
+		          method="post" 
+		          id="sellerInfoForm">
+		    
+			  <!-- Name -->
+		      <div th:class="${#fields.hasErrors('firstName')} ? 'form-group has-error' : 'form-group'" id="firstNameDiv">
+		        <label for="firstName" class="col-sm-3 control-label">Name:</label>
+				<div class="col-sm-3">
+				  <input type="text" 
+					     class="form-control"
+					     name="firstName" 
+					     id="firstName"
+					     th:value="${#object.firstName}"
+					     placeholder="First" />
+				</div>
+				<div class="col-sm-6">
+				  <input type="text" 
+					     class="form-control"
+					     name="lastName" 
+					     id="lastName"
+					     th:value="${#object.lastName}"
+					     placeholder="Last" />
+			    </div>
+				<span th:if="${#fields.hasErrors('firstName')}"
+					  class="help-block" 
+					  th:errors="*{firstName}">Invalid First Name</span>
+				<span th:if="${#fields.hasErrors('lastName')}"
+					  class="help-block" 
+					  th:errors="*{lastName}">Invalid Last Name</span>
+			  </div>
+			  
+			  			  
+			  <!-- Phone Number -->
+		      <div th:class="${#fields.hasErrors('phoneAreaCode')} ? 'form-group has-error' : 'form-group'" id="phoneAreaCodeDiv">
+		        <label for="phoneAreaCode" class="col-sm-3 control-label">Phone Number:</label>
+				<div class="col-sm-2">
+				  <input type="text" 
+					   class="form-control"
+					   name="phoneAreaCode" 
+					   id="phoneAreaCode"
+					   th:value="${#object.phoneAreaCode}"
+					   placeholder="212" />
+				</div>
+				<div class="col-sm-2">
+				  <input type="text" 
+					   class="form-control"
+					   name="phoneNxx" 
+					   id="phoneNxx"
+					   th:value="${#object.phoneNxx}"
+					   placeholder="555" />
+			   	</div>
+			   	<div class="col-sm-2">
+				  <input type="text" 
+					   class="form-control"
+					   name="phoneXxxx" 
+					   id="phoneXxxx"
+					   th:value="${#object.phoneXxxx}"
+					   placeholder="5555" />
+				</div>
+				<span th:if="${#fields.hasErrors('phoneAreaCode')}"
+					  class="help-block" 
+					  th:errors="*{phoneAreaCode}">Invalid Phone Number</span>				
+			  </div>
+			  
+			  <!-- DOB -->
+		      <div th:class="${#fields.hasErrors('dobYear')} ? 'form-group has-error' : 'form-group'" id="dobYearDiv">
+		        <label for="phoneAreaCode" class="col-sm-3 control-label">Date of Birth:</label>
+				<div class="col-sm-2">
+				  <input type="text" 
+					   class="form-control"
+					   name="dobMonth" 
+					   id="dobMonth"
+					   th:value="${#object.dobMonth}"
+					   placeholder="MM" />
+			   	</div>
+			   	<div class="col-sm-2">
+				  <input type="text" 
+					   class="form-control"
+					   name="dobDay" 
+					   id="dobDay"
+					   th:value="${#object.dobDay}"
+					   placeholder="DD" />
+				</div>
+				<div class="col-sm-2">
+				  <input type="text" 
+					   class="form-control"
+					   name="dobYear" 
+					   id="dobYear"
+					   th:value="${#object.dobYear}"
+					   placeholder="YYYY" />
+				</div>
+				<span th:if="${#fields.hasErrors('dobYear')}"
+					  class="help-block" 
+					  th:errors="*{dobYear}">Invalid DOB</span>				
+			  </div>
+			  
+			  <!-- Address -->
+		      <div th:class="${#fields.hasErrors('addressFirstLine')} ? 'form-group has-error' : 'form-group'" id="addressFirstLineDiv">
+		        <label for="addressFirstLine" class="col-sm-3 control-label">Address:</label>
+				<div class="col-sm-6">
+				  <input type="text" 
+					     class="form-control"
+					     name="addressFirstLine" 
+					     id="addressFirstLine"
+					     th:value="${#object.addressFirstLine}"
+					     placeholder="First Line" />
+				</div>
+				<span th:if="${#fields.hasErrors('addressFirstLine')}"
+					  class="help-block" 
+					  th:errors="*{addressFirstLine}">Invalid Address</span>
+			  </div>
+	
+		      <div th:class="${#fields.hasErrors('addressSecondLine')} ? 'form-group has-error' : 'form-group'" id="addressSecondLineDiv">
+		        <label for="addressSecondLine" class="col-sm-3 control-label"></label>
+				<div class="col-sm-6">
+				  <input type="text" 
+					     class="form-control"
+					     name="addressSecondLine" 
+					     id="addressSecondLine"
+					     th:value="${#object.addressSecondLine}"
+					     placeholder="Second Line" />
+				</div>
+				<span th:if="${#fields.hasErrors('addressSecondLine')}"
+					  class="help-block" 
+					  th:errors="*{addressSecondLine}">Invalid Address</span>
+			  </div>
+			  
+			  <div th:class="${#fields.hasErrors('city')} ? 'form-group has-error' : 'form-group'" id="cityDiv">
+		        <label for="city" class="col-sm-3 control-label"></label>
+				<div class="col-sm-3">
+				  <input type="text" 
+					     class="form-control"
+					     name="city" 
+					     id="city"
+					     th:value="${#object.city}"
+					     placeholder="City" />
+				</div>
+				<div class="col-sm-4">
+				  <input type="text" 
+					     class="form-control"
+					     name="state" 
+					     id="state"
+					     th:value="${#object.state}"
+					     placeholder="State" />
+				</div>
+				<div class="col-sm-2">
+				  <input type="text" 
+					     class="form-control"
+					     name="zip" 
+					     id="zip"
+					     th:value="${#object.zip}"
+					     placeholder="Zip" />
+				</div>				
+				<span th:if="${#fields.hasErrors('city')}"
+					  class="help-block" 
+					  th:errors="*{city}">Invalid Address</span>
+			  </div>
+			
+	          <button type="submit" class="btn btn-primary">Accept Merchant Terms and Continue</button>
+		    
+		    </form>
+		    
+		    <div style="margin-top: 50px;">
+		      <p>
+		        Got questions? You can reach us at <a href="mailto:support@socialeq.co">support@socialeq.co</a>
+		      </p>
+		    </div>
+		    
+		  </div>
+	    </div>	    
+	  </div>
+	</div>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:tiles="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org"
+      lang="en">
+
+<head tiles:include="header" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#"></head>
+
+<body>
+	
+	<span tiles:include="scripts"></span>
+
+	<div class="row" tiles:include="authentication-banner"></div>
+
+	<div class="row">
+	  <div tiles:include="alert-drawer"></div>
+	</div>
+
+	<div class="band">
+		<div class="container">
+			<div class="row">
+				
+				
+					<div id="main" tiles:include="body">
+	
+			          <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->      
+			          <!-- At runtime, the body of this <div> will be substituted by -->
+			          <!-- Tiles in order to create the final HTML page that will be -->
+			          <!-- sent to the browser.                                      -->
+			          <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->      
+			          
+			          BODY PAGE GOES HERE!
+		          
+	        		</div>
+	        	
+				
+			</div><!--  /row -->
+		</div><!-- /container-fluid -->
+	</div><!-- /band -->
+
+    <div class="band footer">
+		  <div class="wrapper" tiles:include="footer-band"></div>
+    </div>
+	
+</body>
+</html>

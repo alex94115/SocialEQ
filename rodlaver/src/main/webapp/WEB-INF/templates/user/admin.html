@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	th:with="activePage='user.admin',
+			 isUserLoggedIn=${not #strings.containsIgnoreCase(#authentication.name, 'anonymousUser')}">
+			 
+	<div tiles:fragment="body">
+		<div> 
+			
+			<h3>User Administration</h3>
+			
+			<h4>Search for a user:</h4>
+			
+			<form role="form"
+			      class="form-inline" 
+			      action="#" 
+		          th:action="@{/user/userAdminSearch}" 
+		          method="post" 
+		          id="userAdminForm">
+		     
+		    	<div class="form-group">
+		    	    <label for="providerId">By Provider User Id:</label>
+		    	    <select class="form-control" name="providerId">
+		    	      <option th:selected="${ #strings.contains( #objects.nullSafe( providerId, ''),'Twitter') ? 'selected' : 'false'}">Twitter</option>
+		    	      <option th:selected="${ #strings.contains( #objects.nullSafe( providerId, ''),'Facebook') ? 'selected' : 'false'}">Facebook</option>
+		    	    </select>
+		    	    <label class="sr-only" for="providerUserId">Provider User Id:</label>
+		    	    <input type="text" class="form-control" name="providerUserId" placeholder="providerUserId" th:value="${providerUserId}"/>
+		    	</div>
+		    	
+		    	<button type="submit" class="btn btn-primary btn-large">Lookup User</button>
+
+		     </form>
+		     
+		     <form role="form"
+			      class="form-inline" 
+			      action="#" 
+		          th:action="@{/user/userAdminSearch}" 
+		          method="post" 
+		          id="userAdminForm">
+		     
+		    	<div class="form-group">
+		    	    <label for="username">By Username:</label>
+		    	    <input type="text" class="form-control" name="username" id="username" placeholder="twitter/alexduff1" th:value="${username}"/>
+		    	</div>
+		    	
+		    	<button type="submit" class="btn btn-primary btn-large" id="lookupUserByUsername">Lookup User</button>
+
+		     </form>
+		    
+		     <div th:if="${didSearch}">
+			     <h4>User Information:</h4>
+				 <div th:unless="${adminForm}">User not found.</div>
+	
+				 <div th:if="${adminForm}">
+					 <form role="form"
+					      class="form-horizontal" 
+					      action="#" 
+				          th:action="@{/user/userAdminUpdate}" 
+				          method="post" 
+				          id="userInfoForm" 
+				          th:object="${adminForm}">
+				          
+				        <input type="hidden" 
+						       name="username" 
+							   th:value="${#object.username}" />
+				     
+				    	<div class="form-group">
+				    	  <div class="col-sm-6">
+				    	    <label>User is registered</label>
+				    	    <label th:inline="text">Username: [[${#object.username}]]</label>
+				    	  </div>
+				    	</div>
+				    	
+				    	<div class="form-group">
+				    	  <div class="col-sm-4">
+					    	<label>Privileges:</label>
+					    	<div class="checkbox">
+					    	    <label><input type="checkbox" value="true" name="hasBuyer" th:checked="${#object.hasBuyer}" />Buyer</label>
+					    	</div>
+	
+					    	<div class="checkbox">
+					    	    <label><input type="checkbox" value="true" name="hasSeller" th:checked="${#object.hasSeller}" />Seller</label>
+					    	</div>
+					    	
+					    	<div class="checkbox">
+					    	    <label><input type="checkbox" value="true" name="hasCharity" th:checked="${#object.hasCharity}"/>Charity</label>
+					    	</div>
+
+					    	<div class="checkbox">
+					    	    <label><input type="checkbox" value="true" name="hasAdmin" th:checked="${#object.hasAdmin}" />Admin</label>
+					    	</div>
+
+					    						    	
+					      </div>
+						</div>
+						
+						<div class="form-group">
+				    	  <div class="col-sm-4">
+					    	<label>Blocking:</label>
+					    	<div class="checkbox">
+					    	    <label>
+						    	    <input type="checkbox" value="true" name="isBlocked" th:checked="${#object.isBlocked}" />
+						    	    User Is Blocked
+						    	</label>
+					    	</div>
+	
+					      </div>
+						</div>
+						
+						<div class="form-group">
+				    	  <div class="col-sm-4">
+				    	    <label for="emailAddress">Email Address:</label>
+				    	    <input type="text" class="form-control" name="emailAddress" th:value="${#object.emailAddress}"/>
+				    	  </div>
+				    	</div>
+				    	
+				    	<div class="form-group">
+				    	  <div class="col-sm-4">
+				    	    <label for="facebookPageId">Facebook Page Id:</label>
+				    	    <input type="text" class="form-control" name="facebookPageId" th:value="${#object.facebookPageId}"/>
+				    	  </div>
+				    	</div>
+				    	
+				    	<div class="form-group">
+				    	  <div class="col-sm-4">
+				    	    <label for="facebookPageUrl">Facebook Page Url:</label>
+				    	    <input type="text" class="form-control" name="facebookPageUrl" th:value="${#object.facebookPageUrl}"/>
+				    	  </div>
+				    	</div>
+
+				    	<div class="form-group">
+				    	  <div class="col-sm-4">
+				    	    <label for="facebookPageId">Facebook Album Id:</label>
+				    	    <input type="text" class="form-control" name="facebookAlbumId" th:value="${#object.facebookAlbumId}"/>
+				    	  </div>
+				    	</div>
+				    	
+				    	<div class="form-group" th:if="${#object.hasActivePreapproval}">
+				    	  <div class="col-sm-4">
+				    	    <label>User Has Active Preapproval</label>
+				    	  </div>
+				    	</div>
+				    	
+				    	<div class="form-group" th:unless="${#object.hasActivePreapproval}">
+				    	  <div class="col-sm-4">
+				    	    <label>User Does Not Have Active Preapproval</label>
+				    	  </div>
+				    	</div>
+				    	
+						
+						<button type="submit" class="btn btn-primary btn-large">Update User</button>
+		
+				     </form>
+			     </div>
+			 </div>		       
+			
+		</div><!-- body-fragment -->
+	</div>
+</html>

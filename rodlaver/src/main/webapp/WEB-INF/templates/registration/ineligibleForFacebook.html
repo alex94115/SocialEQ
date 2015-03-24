@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+
+	 <div id="registration-wrapper">
+				  
+	   <div class="row">
+	     <div class="col-sm-12">
+	       <div class="headline">
+	         <h1>We Can't Find Your Facebook Page</h1>
+	         <h2>To sell fan direct via Facebook, you need to be have a Facebook page.</h2>
+	       </div>
+	     </div>
+	   </div>
+	      
+	   <div class="row">
+	     <div class="col-sm-8">
+		
+		   <p>
+		     You can't sell on Facebook because your Facebook account is not linked to an artist page. To
+		     continue, you need to either create a Facebook page or add your Facebook account as an administrator
+		     of the page. 
+		   </p>
+		
+		   <ul>
+		     <li><a href="https://www.facebook.com/help/104002523024878" target="_blank">Create a Facebook page</a></li>
+		     <li><a href="https://www.facebook.com/help/187316341316631" target="_blank">Add a Page administrator</a></li>
+		   </ul>
+		
+		   <p>Once you've created a page, click here:</p>
+		 
+		   <a href="#" th:href="@{/registration/chooseFacebookPage}">
+		     <button class="btn btn-primary">Try Again</button>
+		   </a>
+		
+		   <p class="secondary-option">
+		     <a href="#" th:href="@{/registration/linkTwitter}">I don't want to sell on Facebook</a>
+		   </p>
+		
+		   <div style="margin-top: 50px;">
+		     <p>
+		       Got questions? You can reach us at <a href="mailto:support@socialeq.co">support@socialeq.co</a>
+		     </p>
+		   </div>		
+		
+		  </div>
+	    </div>
+	  </div>
+		
+	</div>
+</html>

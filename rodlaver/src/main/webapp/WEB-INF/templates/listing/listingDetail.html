@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+        
+		<div class="row" style="padding-top: 10px;"><!-- start of top row -->
+		  
+		  <div class="col-sm-8">
+		    <div class="row">
+		      <div class="panel panel-default" id="productDescriptionPanel">
+		        <div class="panel-body">
+		          <div class="col-xs-1 visible-xs"></div>
+		          <div class="col-xs-10 col-sm-6">
+		            <img class="img-responsive" th:src="${cloudfrontPublicBaseUrl + saleInfo.imageFilename}" />
+		          </div>
+		          <div class="col-xs-1 visible-xs"></div>
+		          <div class="clearfix visible-xs"></div>
+		          
+		          <div class="col-xs-1 visible-xs"></div>
+		          <div class="col-xs-10 col-sm-6">
+		            
+		            <div class="row">
+		              <div class="col-xs-12">
+		                <h4 class="media-object" th:text="${saleInfo.title}">Sale title</h4>
+			            <a class="pull-left" href="#" th:href="${sellerProfileUrl}">
+			              <img class="media-object" th:src="@{${#strings.replace(sellerProfileImageUrl,'http','https')}}" alt="Text" style="width: 48px; height: 48px; margin: 0 5px 0 0;"/>
+			            </a>
+			            <div class="seller">
+			              <span th:if="${#strings.containsIgnoreCase(saleInfo.type,'SELLING')}">Sold by</span>
+			              <span th:if="${#strings.containsIgnoreCase(saleInfo.type,'CAMPAIGN')}">Offered by</span> 
+			              <a th:href="${sellerProfileUrl}" href="#"><span th:text="${saleInfo.seller.screenFormattedUsername}">Seller Name</span></a>
+			            </div>
+			            <div th:if="${sellerProfileUrl}">
+			              <a href="#" th:href="${sellerProfileUrl}" class="twitter-follow-button" data-show-count="true" data-size="medium" data-show-screen-name="false">Follow on twitter</a>
+		                </div>
+		                <div th:if="${sellerFacebookPageUrl}">
+		    	          <div class="fb-like" th:data-href="${sellerFacebookPageUrl}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
+			            </div>
+			          </div>
+			        </div>
+			  		<div class="row">
+			  		  <div class="col-xs-12">
+			            <div th:text="${saleInfo.longDescription}">Long description content</div>
+			  		  </div>
+			  		</div>
+				
+		          </div>
+		          <div class="col-xs-1 visible-xs"></div>
+		          <div class="clearfix visible-xs"></div>
+		          
+		        </div>
+		      </div>
+		    </div>
+		  </div><!-- end col-sm-8 -->
+		  
+		  <div class="col-sm-4">
+		    <div class="row">
+		      <div class="col-xs-1 visible-xs"></div>
+		      <div class="col-xs-10 col-xm-12"><!-- start buttons / checkout widget -->
+
+		        <div th:if="${isActionButtonActive} and ${#strings.contains(buttonActionMode, 'PRE_CHECKOUT')}" 
+		             class="panel panel-default" id="checkoutPanel"><!-- start of checkout panel -->
+		          <div class="panel-heading">
+		            <h4 class="panel-title">Checkout</h4>
+		          </div>
+		          <div class="panel-body">
+		            <form class="form-horizontal" role="form" id="checkoutForm">
+		              
+		              <div class="form-group">
+					    <label for="selectProduct" class="col-sm-4 control-label">Item</label>
+						<div class="col-sm-8">
+						  <select class="form-control" id="selectProduct">
+						    <option value="" disabled="disabled" selected="selected">Select one...</option>
+							<option th:each="p : ${saleInfo.inventories}"
+			                  		th:value="${p.productCode}"
+			                  		th:text="${p.description}">Product</option>
+						  </select>
+						</div> 
+					  </div>
+					  
+					  <div class="form-group">	
+					    <label for="selectQty" class="col-sm-4 control-label">Quantity</label>
+						<div class="col-sm-8">
+						  <select class="form-control" id="selectQty">
+						    <option value="" disabled="disabled" selected="selected">Select one...</option>
+							<option th:each="i : ${#numbers.sequence( 1, saleInfo.maxQtyPerPurchase)}"
+        		 	  	      		th:value="${i}"
+        					  		th:text="${i}">1</option>
+						  </select>
+					     </div>
+					  </div>
+					  
+					  <input type="hidden" id="listingId" th:value="${saleInfo.id}" />
+					  
+					  <button id="preCheckoutButton" 
+					          type="button" 
+					          class="btn herobtn" 
+					          style="width: 100%;" 
+					          th:text="${actionButtonText}">Add to Cart</button>
+					  
+					  <a href="#"
+			       		 class="btn herobtn"
+			       		 data-toggle="modal"
+			       		 data-target="#paymentModal"
+					     style="display: none; width: 100%;"
+					     id="checkoutButton">Checkout</a>
+					          
+					  
+		            </form>
+		          </div>
+		        </div><!-- end of checkout panel -->
+		        
+		        <a th:if="${isActionButtonActive} and ${#strings.contains(buttonActionMode, 'START_CHECKOUT')}" 
+			       th:text="${actionButtonText}" 
+			       href="#"
+			       class="btn herobtn"
+			       data-toggle="modal"
+			       data-target="#paymentModal"
+			       id="checkoutButton">Add Payment Method</a>
+			       
+			    <a th:if="${isActionButtonActive} and ${#strings.contains(buttonActionMode, 'COMMENT')}" 
+			       th:text="${actionButtonText}" 
+			       class="btn herobtn" 
+			       th:href="@{'/listing/listingDetail/' + ${saleInfo.id} + '/comment'}">Go to the comment instructions page</a>
+			       
+			    <a th:if="${isActionButtonActive} and ${#strings.contains(buttonActionMode, 'TRANSACTION_DETAIL')}"
+			       href="#"
+			       th:text="${actionButtonText}"
+			       th:href="@{'/listing/transactionDetail/' + ${paymentId}}"
+			       class="btn herobtn">TODO</a>
+			    
+			    <a th:unless="${isActionButtonActive}" 
+			       th:text="${actionButtonText}" 
+			       disabled="disabled" 
+			       class="btn herobtn" 
+			       href="#">Button action text</a>
+		        
+		        
+		      </div><!-- end buttons & checkout widget -->
+		    </div>
+		  </div><!-- end of col-sm-4 -->
+
+		    
+		</div><!-- end of top row -->
+		
+		<div class="row">
+		  <div class="col-xs-1 visible-xs"></div>
+		  <div class="col-xs-10 col-sm-12">
+		    <hr/>
+		    <h3>Details</h3>
+		    <table>
+		  	  <tbody>
+				<tr>
+					<td>
+						<div class="muted text-right"><span th:text="#{sale.detail.label.type}">Type: </span>&nbsp;&nbsp;</div>
+					</td>
+					<td>
+						<span th:text="#{${saleInfo.listingTypeMessageKey}}">Type</span>
+					</td>
+				</tr>
+				<tr th:if="${saleInfo.amount}">
+					<td>
+						<div class="muted text-right"><span th:text="#{sale.detail.label.amount}">Price:</span>&nbsp;&nbsp;</div>
+					</td>
+					<td>
+	                   	<span th:text="'$' + ${#numbers.formatDecimal(saleInfo.amount, 0, 'COMMA', 2, 'POINT')}">$0.00</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="muted text-right"><span th:text="#{sale.detail.label.status}">Availability:</span>&nbsp;&nbsp;</div>
+					</td>
+					<td>
+						<span th:text="#{${saleInfo.listingStatusMessageKey}}">Status</span>
+					</td>
+				</tr>
+				<tr th:if="${saleInfo.keyword}">
+					<td>
+						<div class="muted text-right"><span th:text="#{sale.detail.label.keyword}">Hashtag:</span>&nbsp;&nbsp;</div>
+					</td>
+					<td>
+	                   	<span th:text="${saleInfo.keyword}">#Keyword</span>
+					</td>
+				</tr>
+<!-- 				<tr th:if="${saleInfo.remainingQuantity}"> -->
+<!-- 					<td> -->
+<!-- 						<div class="muted text-right"><span th:text="#{sale.detail.label.quantity.remaining}">Remaining:</span>&nbsp;&nbsp;</div> -->
+<!-- 					</td> -->
+<!-- 					<td> -->
+<!-- 	                   	<span th:text="${saleInfo.remainingQuantity}">1</span> -->
+<!-- 					</td> -->
+<!-- 				</tr> -->
+				<tr>
+					<td>
+						<div class="muted text-right"><span th:text="#{sale.detail.label.quantity.remaining}">Remaining:</span>&nbsp;&nbsp;</div>
+					</td>
+					<td>
+	                   	<span>Unknown</span>
+					</td>
+				</tr>
+				<tr th:if="${#strings.containsIgnoreCase(saleInfo.status,'PENDING')} or 
+						   ${#strings.containsIgnoreCase(saleInfo.status,'ACTIVE')}">
+					<td>
+						<div class="muted text-right"><span th:text="#{sale.detail.label.expires}">Ends:</span>&nbsp;&nbsp;</div>
+					</td>
+					<td>
+	                   	<span th:text="${ remainingDays + ' days, ' + remainingHours + ' hours, ' + remainingMinutes + ' minutes, and ' + remainingSeconds + ' seconds' }"></span>
+					</td>
+				</tr>
+				<tr th:unless="${#strings.containsIgnoreCase(saleInfo.status,'PENDING')} or
+							   ${#strings.containsIgnoreCase(saleInfo.status,'ACTIVE')}">
+					<td>
+						<div class="muted text-right"><span th:text="#{sale.detail.label.expired}">Ended:</span>&nbsp;&nbsp;</div>
+					</td>
+					<td>
+						<span th:text="${#dates.format(saleInfo.expires, 'MMMMM dd h:mm a z')}">24-SEP 12:00 pm</span>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+					    <a href="#" data-toggle="modal" data-target="#termsModal">Full Terms &amp; Conditions</a>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<div style="margin-top: 20px;" th:text="#{app.copyright}">Copyright 2013 rodlaver.com</div>
+					</td>
+				</tr>
+			  </tbody>
+		    </table>
+		   
+		  </div>
+		  <div class="col-xs-1 visible-xs"></div>  
+		
+		</div>
+		
+		<!-- Terms Modal -->
+		<div class="modal fade" id="termsModal" tabindex="-1" role="dialog" aria-labelledby="termsModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title" id="termsModalLabel">Terms &amp; Conditions</h4>
+		      </div>
+		      <div class="modal-body">
+		        <div th:utext="${saleInfo.termsAndConditions}"></div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		
+		<!-- Payment Modal -->
+		<div th:if="${isActionButtonActive} and (${#strings.contains(buttonActionMode, 'PRE_CHECKOUT')} or ${#strings.contains(buttonActionMode, 'START_CHECKOUT')})" 
+			 class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h5 class="modal-title" id="paymentModalLabel">Credit Card Payment</h5>
+		      </div>
+		      <div class="modal-body">
+				<div>
+				
+				  <form role="form" id="paymentForm" method="post" th:action="@{'/listing/completeCheckout/' + ${saleInfo.id}}">
+					<div id="dropin"></div>
+				    <div class="form-group">
+					  <div class="checkbox">
+					    <label>
+						  <input type="checkbox" id="doSaveMethodOfPayment" name="doSaveMethodOfPayment" checked="checked" /> Use this credit card by default for future purchases 
+						</label>
+					  </div>
+					</div>
+				    <div class="form-group">
+				      <button type="submit" class="btn herobtn">Pay Now</button>
+				    </div>
+				  </form>
+				  
+				</div>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		
+	</div>
+	
+</html>

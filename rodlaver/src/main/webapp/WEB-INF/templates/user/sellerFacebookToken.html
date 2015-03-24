@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	th:with="activePage='user.admin',
+			 isUserLoggedIn=${not #strings.containsIgnoreCase(#authentication.name, 'anonymousUser')}">
+			 
+	<div tiles:fragment="body">
+		<div> 
+			
+			<h3>Renew Seller Facebook Token</h3>
+			
+			<p>Before we can post to your Facebook page, we need you to give us permissions to post to that page on your behalf. 
+			   Just click on the link below. Facebook will ask you to confirm that SocialEQ can manage pages for you.
+			   Once you click OK, you'll be done.</p>
+			
+			<p th:if="${isFacebookEnabled}">
+			  <a th:href="@{/auth/facebook(scope='email,manage_pages,publish_actions,user_photos')}">
+			    <img name="signInWithFacebook" src="#"
+					 th:src="@{/resources/images/facebook/login-with-facebook.png}"
+					 style="width: 170px; padding-top: 5px; padding-bottom: 5px;"
+					 alt="Sign In with Facebook image" />
+			  </a>
+			</p>
+	
+			
+		</div><!-- body-fragment -->
+	</div>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+
+	 <div id="registration-wrapper">
+				  
+	   <div class="row">
+	     <div class="col-sm-12">
+	       <div class="headline">
+	         <h1>SocialEQ Can't Work All By Itself</h1>
+	         <h2>You need to link either a Facebook or Twitter account to take advantage of our great features and low fees.</h2>
+	       </div>
+	     </div>
+	   </div>
+	      
+	   <div class="row">
+	     <div class="col-sm-8">
+
+		   <p>
+		     SocialEQ let you take control by letting you sell fan direct on Twitter and Facebook. To sign up 
+		     and take advantage of the lowest digital music selling fees around, you need to link to at least one 
+		     Twitter or Facebook account.
+		   </p>
+		
+		   <div class="text-center">
+		     <a href="#" th:href="@{/registration/musician}">
+			   <button class="btn musician-startsell">Start Over</button>
+			 </a>
+		   </div>
+
+		   <div style="margin-top: 50px;">
+		     <p>
+		       Got questions? You can reach us at <a href="mailto:support@socialeq.co">support@socialeq.co</a>
+		     </p>
+		   </div>
+			
+		 </div>
+	   </div>
+	 </div>
+		
+	</div>
+</html>

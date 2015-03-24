@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+	  <script	src="#"	th:src="@{/resources/js/new-sale.js}"></script>
+	  <script	src="#"	th:src="@{/resources/js/vendor/twitter-text-1.6.1.js}"></script>
+	  <script th:inline="javascript">
+	  /*<![CDATA[*/
+		    var hasNewListingFieldErrors = /*[[${hasNewListingFieldErrors}]]*/;
+		 	var hasNewListingUploadErrors = /*[[${hasNewListingUploadErrors}]]*/;  
+	  /*]]>*/
+	  </script>
+
+
+	  
+	  <h2 th:text="#{listing.new.headline}">Design Your Campaign:</h2>
+
+	  <form role="form"
+		    action="#" 
+	        th:action="@{/listing/newListing(${_csrf.parameterName}=${_csrf.token})}" 
+	        method="post" 
+	        id="listingForm" 
+	        class="form-horizontal" 
+	        enctype="multipart/form-data" 
+	        th:object="${saleForm}"> 
+
+
+		  <!--  left gutter -->
+		  <div class="col-xs-1 visible-xs"></div>
+			
+		  <!-- First Column -->
+		  <div class="col-xs-10 col-sm-5">
+		    
+		    <div class="row" th:if="${removeToReenableErrorBlock}">
+			  <div class="col-xs-11 col-sm-11">
+			    <div class="form-group has-error bg-danger" th:if="${#fields.hasErrors('*')}">
+				  <button type="button" class="close" aria-hidden="true" data-dismiss="alert">&times;</button>
+				  <strong>Error:</strong>
+				  <ul>
+					<li th:each="err : ${#fields.errors('*')}" th:text="${err}">Input is incorrect</li>
+				  </ul>
+			    </div>
+			  </div>
+		    </div>
+			
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+			    <div th:class="${#fields.hasErrors('publishTo')} ? 'form-group has-error' : 'form-group'" id="publishToDiv">
+			      <label for="publishTo">
+			    	<a href="#" id="publishToPopover" 
+			    	   th:attr="data-original-title=#{listing.new.form.publishTo.popover.title},data-content=#{listing.new.form.publishTo.popover.text}"
+			    	   th:text="#{listing.new.form.publishTo.label}">Post My Campaign To:</a>
+				  </label>
+				  <div class="input-group">
+			        <div th:class="${enableTwitter} ? 'checkbox' : 'checkbox disabled'">
+			          <label th:if="${enableTwitter}">
+			            <input type="checkbox" id="publishToTwitter" name="publishTo" value="twitter" th:checked="${#sets.contains(#object.publishTo,'twitter')}" />Twitter
+			          </label>
+			          <label th:unless="${enableTwitter} or ${#sets.contains(#object.publishTo,'twitter')}">
+			            <input type="checkbox" id="publishToTwitter" name="publishTo" value="twitter" disabled="disabled" />Twitter
+			          </label>
+			        </div>
+			        <div th:class="${enableFacebook} ? 'checkbox' : 'checkbox disabled'">
+			          <label th:if="${enableFacebook}">
+			            <input type="checkbox" id="publishToFacebook" name="publishTo" value="facebook" th:checked="${#sets.contains(#object.publishTo,'facebook')}" />Facebook
+			          </label>
+			          <label th:unless="${enableFacebook} or ${#sets.contains(#object.publishTo,'facebook')}">
+			            <input type="checkbox" id="publishToFacebook" name="publishTo" value="facebook" disabled="disabled" />Facebook
+			          </label>
+			        </div>
+			      </div>
+			      <span th:if="${#fields.hasErrors('publishTo')}" class="help-block" th:errors="*{publishTo}">Invalid Publish To</span>
+			    </div>
+			  </div>
+			</div>
+			
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+				  <div th:class="${#fields.hasErrors('isRevenueCampaign')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="isRevenueCampaignDiv">
+				    <label for="isRevenueCampaign">
+				    	<a href="#" id="listingTypePopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.type.popover.title},data-content=#{listing.new.form.type.popover.text}"
+				    	   th:text="#{listing.new.form.isRevenueCampaign.label}">This Campaign Will:</a>
+					</label>
+				    <div class="switch">
+				      <input type="radio" class="switch-input" name="isRevenueCampaign" value="true" id="isRevenueCampaignTrue" checked="checked" th:checked="${#object.isRevenueCampaign}" />
+				      <label for="isRevenueCampaignTrue" class="switch-label switch-label-off">Take Payments</label>
+				      <input type="radio" class="switch-input" name="isRevenueCampaign" value="false" id="isRevenueCampaignFalse" th:checked="not ${#object.isRevenueCampaign}" />
+				      <label for="isRevenueCampaignFalse" class="switch-label switch-label-on">Offer Prizes</label>
+				      <span class="switch-selection"></span>
+				    </div>
+				  </div>
+	
+	              <div th:class="${#fields.hasErrors('isInstantGiveaway')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="giveawayTypeDiv">
+				    <label for="isInstantGiveaway">
+				    	<a href="#" id="giveawayTypePopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.giveaway.type.popover.title},data-content=#{listing.new.form.giveaway.type.popover.text}"
+				    	   th:text="#{listing.new.form.giveawayType.label}">How Should We Pick Winners?</a>
+					</label>
+				    <div class="switch">
+				      <input type="radio" class="switch-input" name="isInstantGiveaway" value="false" id="isInstantGiveawayFalse" checked="checked" th:checked="not ${#object.isInstantGiveaway}" />
+				      <label for="isInstantGiveawayFalse" class="switch-label switch-label-off">Via Drawing</label>
+				      <input type="radio" class="switch-input" name="isInstantGiveaway" value="true" id="isInstantGiveawayTrue" th:checked="${#object.isInstantGiveaway}" />
+				      <label for="isInstantGiveawayTrue" class="switch-label switch-label-on">Everyone Wins</label>
+				      <span class="switch-selection"></span>
+				    </div>
+				  </div>
+	
+	              <div th:class="${#fields.hasErrors('isFundraiser')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="isFundraiserDiv">
+				    <label for="isFundraiser">
+				    	<a href="#" id="isFundraiserPopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.fundraiser.type.popover.title},data-content=#{listing.new.form.fundraiser.type.popover.text}"
+				    	   th:text="#{listing.new.form.isFundraiser.label}">Are You Running a Charity Fund Drive?</a>
+					</label>
+				    <div class="switch">
+				      <input type="radio" class="switch-input" name="isFundraiser" value="false" id="isFundraiserFalse" checked="checked" th:checked="${#object.isFundraiser}" />
+				      <label for="isFundraiserFalse" class="switch-label switch-label-off">No</label>
+				      <input type="radio" class="switch-input" name="isFundraiser" value="true" id="isFundraiserTrue" th:checked="not ${#object.isFundraiser}" />
+				      <label for="isFundraiserTrue" class="switch-label switch-label-on">Yes</label>
+				      <span class="switch-selection"></span>
+				    </div>
+				  </div>	
+				  
+				  <div th:class="${#fields.hasErrors('isFundraiserReward')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="isFundraiserRewardDiv">
+				    <label for="isFundraiserReward">
+				    	<a href="#" id="isFundraiserRewardPopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.fundraiser.reward.popover.title},data-content=#{listing.new.form.fundraiser.reward.popover.text}"
+				    	   th:text="#{listing.new.form.isFundraiserReward.label}">Is There a Donor Reward?</a>
+					</label>
+				    <div class="switch">
+				      <input type="radio" class="switch-input" name="isFundraiserReward" value="false" id="isFundraiserRewardFalse" checked="checked" th:checked="${#object.isFundraiserReward}" />
+				      <label for="isFundraiserRewardFalse" class="switch-label switch-label-off">No</label>
+				      <input type="radio" class="switch-input" name="isFundraiserReward" value="true" id="isFundraiserRewardTrue" th:checked="not ${#object.isFundraiserReward}" />
+				      <label for="isFundraiserRewardTrue" class="switch-label switch-label-on">Yes</label>
+				      <span class="switch-selection"></span>
+				    </div>
+				  </div>	
+				  
+				  <div th:class="${#fields.hasErrors('isPhysicalGood')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="isPhysicalGoodDiv">
+				    <label for="isPhysicalGood">
+				    	<a href="#" id="goodTypePopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.good.type.popover.title},data-content=#{listing.new.form.good.type.popover.text}"
+				    	   th:text="#{listing.new.form.goodType.label}">What Are You Offering?</a>
+					</label>
+				    <div class="switch">
+				      <input type="radio" class="switch-input" name="isPhysicalGood" value="true" id="isPhysicalGoodTrue" checked="checked" th:checked="${#object.isPhysicalGood}"  />
+				      <label for="isPhysicalGoodTrue" class="switch-label switch-label-off">Yes</label>
+				      <input type="radio" class="switch-input" name="isPhysicalGood" value="false" id="isPhysicalGoodFalse" th:checked="not ${#object.isPhysicalGood}" />
+				      <label for="isPhysicalGoodFalse" class="switch-label switch-label-on">No</label>
+				      <span class="switch-selection"></span>
+				    </div>
+				  </div>
+				  
+				  <div th:class="${#fields.hasErrors('isDigitalDownload')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="isDigitalDownloadDiv">
+				    <label for="isDigitalDownload">
+				    	<a href="#" id="digitalTypePopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.digitalType.popover.title},data-content=#{listing.new.form.digitalType.popover.text}"
+				    	   th:text="#{listing.new.form.digitalType.label}">Download or Voucher?</a>
+					</label>
+				    <div class="switch">
+				      <input type="radio" class="switch-input" name="isDigitalDownload" value="true" id="isDigitalDownloadTrue" checked="checked" th:checked="${#object.isDigitalDownload}"  />
+				      <label for="isDigitalDownloadTrue" class="switch-label switch-label-off">Download</label>
+				      <input type="radio" class="switch-input" name="isDigitalDownload" value="false" id="isDigitalDownloadFalse" th:checked="not ${#object.isDigitalDownload}" />
+				      <label for="isDigitalDownloadFalse" class="switch-label switch-label-on">Voucher</label>
+				      <span class="switch-selection"></span>
+				    </div>
+				  </div>
+				  
+				  <div th:class="${#fields.hasErrors('isLimitedQuantity')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="isLimitedQuantityDiv">
+				    <label for="isLimitedQuantity">
+				    	<a href="#" id="isLimitedQuantityPopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.isLimitedQuantity.popover.title},data-content=#{listing.new.form.isLimitedQuantity.popover.text}"
+				    	   th:text="#{listing.new.form.isLimitedQuantity.label}">Limit Quantity?</a>
+					</label>
+				    <div class="switch">
+				      <input type="radio" class="switch-input" name="isLimitedQuantity" value="false" id="isLimitedQuantityFalse" checked="checked" th:checked="not ${#object.isLimitedQuantity}" />
+				      <label for="isLimitedQuantityFalse" class="switch-label switch-label-off">No</label>
+				      <input type="radio" class="switch-input" name="isLimitedQuantity" value="true" id="isLimitedQuantityTrue" th:checked="${#object.isLimitedQuantity}" />
+				      <label for="isLimitedQuantityTrue" class="switch-label switch-label-on">Yes</label>
+				      <span class="switch-selection"></span>
+				    </div>
+				  </div>
+				</div>
+			  </div>
+				  
+				
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+				  <div th:class="${#fields.hasErrors('price')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="priceDiv">
+					<label for="price">
+				    	<a href="#" id="listingPricePopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.price.popover.title},data-content=#{listing.new.form.price.popover.text}"
+				    	   th:text="#{listing.new.form.price.label}">Price:</a>
+					</label>
+					<div class="input-group">
+						<span class="input-group-addon">$</span>
+						<input type="text" 
+							   class="form-control" 
+							   name="price"
+							   id="price" 
+							   th:value="${#object.price}"
+							   th:placeholder="#{listing.new.form.price.placeholder}" /> 
+					</div>
+					<span th:if="${#fields.hasErrors('price')}" class="help-block" th:errors="*{price}">Invalid Price</span>
+				  </div>
+			  </div>
+			</div>
+	
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+				<div th:class="${#fields.hasErrors('quantity')} ? 'listing-option form-group has-error' : 'listing-option form-group'" id="quantityDiv">
+					<label for="quantity">
+				    	<a href="#" id="listingQuantityPopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.quantity.popover.title},data-content=#{listing.new.form.quantity.popover.text}"
+				    	   th:text="#{listing.new.form.quantity.label}">Quantity:</a>
+					</label>
+					<input type="text" 
+						   class="form-control"
+						   name="quantity" 
+						   id="quantity"
+						   th:value="${#object.quantity}"
+						   th:placeholder="#{listing.new.form.quantity.placeholder}" />
+					<span th:if="${#fields.hasErrors('quantity')}"
+						   class="help-block" 
+						   th:errors="*{quantity}">Invalid Quantity</span>
+				</div>
+		      </div>
+		    </div>
+				
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+				<div th:class="${#fields.hasErrors('keyword')} ? 'form-group has-error' : 'form-group'" id="keywordDiv">
+					<label for="keyword">
+				    	<a href="#" id="listingKeywordPopover" 
+				    	   th:attr="data-title=#{listing.new.form.keyword.popover.title},data-content=#{listing.new.form.keyword.popover.text}"
+				    	   th:text="#{listing.new.form.keyword.label}">
+				    	   Action Keyword:</a> 
+					</label>
+					<div class="input-group">
+						<span class="input-group-addon">#</span>
+						<input type="text" 
+							   class="form-control"
+							   name="keyword" 
+							   id="keyword"
+							   th:value="${#object.keyword}"
+							   th:placeholder="#{listing.new.form.keyword.placeholder}" />
+					</div>
+					<span th:if="${#fields.hasErrors('keyword')}"
+						  class="help-block" 
+						  th:errors="*{keyword}">Invalid Keyword</span>
+				</div>
+		      </div>
+		    </div>
+			    
+	
+			<div class="row" th:if="${removeToReenableListingDetailBackgroundImage}">
+			  <div class="col-xs-11 col-sm-11">
+			
+				<div th:class="${#fields.hasErrors('backgroundImageUrl')} ? 'form-group has-error' : 'form-group'">
+					<label for="backgroundImageUrl">
+				    	<a href="#" id="listingBackgroundImagePopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.backgroundImageUrl.popover.tile},data-content=#{listing.new.form.backgroundImageUrl.popover.text}"
+				    	   th:text="#{listing.new.form.backgroundImageUrl.label}">hover for popover</a>
+					</label>
+	
+					<input type="text" 
+						   class="form-control" 
+						   name="backgroundImageUrl" 
+						   id="backgroundImageUrl" 
+						   th:value="${#object.backgroundImageUrl}"
+						   th:placeholder="#{listing.new.form.backgroundImageUrl.placeholder}" /> 
+					<span th:if="${#fields.hasErrors('backgroundImageUrl')}" class="help-block" th:errors="backgroundImageUrl">Invalid background image url</span>
+				</div>
+		      </div><!-- /col-xs-11 col-sm-11 -->
+		    </div><!-- /row -->
+			
+		  </div><!-- /col-xs-10 col-sm-5 -->
+		  
+		  <!-- Add the extra clearfix for only the required viewport -->
+		  <div class="clearfix visible-xs"></div>
+
+		  <!-- End First Column -->
+			
+		  <!-- Second Column -->
+	
+		  <!--  left gutter on small displays -->
+		  <div class="col-xs-1 visible-xs"></div>
+						
+		  <div class="col-xs-10 col-sm-7">
+		  
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+				<div th:class="${#fields.hasErrors('title')} ? 'form-group has-error' : 'form-group'" id="titleDiv">
+					<label for="title">
+				    	<a href="#" id="listingTitlePopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.title.popover.title},data-content=#{listing.new.form.title.popover.text}"
+				    	   th:text="#{listing.new.form.title.label}">Title:</a>
+					</label>
+					<input type="text" 
+						   class="form-control" 
+						   name="title" 
+						   id="title" 
+						   th:value="${#object.title}"
+						   th:placeholder="#{listing.new.form.title.placeholder}" /> 
+					<span th:if="${#fields.hasErrors('title')}" 
+						   class="help-block" 
+						   th:errors="*{title}">Invalid Title</span>
+				</div>
+			  </div>
+			</div>
+			
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+				<div th:class="${#fields.hasErrors('longDescription')} ? 'form-group has-error' : 'form-group'">
+					<label for="longDescription">
+				    	<a href="#" id="listinglongDescriptionPopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.longDescription.popover.title},data-content=#{listing.new.form.longDescription.popover.text}"
+				    	   th:text="#{listing.new.form.longDescription.label}">Long Description:</a>
+					</label>
+	
+					<textarea class="form-control required" 
+						      name="longDescription" 
+						      id="longDescription" 
+						      rows="5"
+						      th:text="${#object.longDescription}"
+						      th:placeholder="#{listing.new.form.longDescription.placeholder}"></textarea> 
+					<span th:if="${#fields.hasErrors('longDescription')}" class="help-block" th:errors="*{longDescription}">Invalid Long Description</span>
+				</div>
+			  </div>
+			</div>
+
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+				<div th:class="${#fields.hasErrors('message')} ? 'form-group has-error' : 'form-group'">
+					<div id="tweet_length_error"><span class="label label-warning">Too many characters<br/></span></div>
+					<label for="message">
+				    	<a href="#" id="listingMessagePopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.message.popover.title},data-content=#{listing.new.form.message.popover.text}"
+				    	   th:text="#{listing.new.form.message.label}">Tweet Message:</a>
+					</label>
+					
+					<textarea name="message" 
+							  id="message" 
+							  class="form-control required"
+							  rows="5" 
+							  th:text="${#object.message}"
+							  placeholder="Tell the world what you want them to see."></textarea>
+					<span th:if="${#fields.hasErrors('message')}"
+						   class="help-block" 
+						   th:errors="*{message}">Invalid Message</span>
+					
+					<p id="tweet_length" th:inline="text">[[#{listing.new.label.tweet.remaining.characters}]] <span id="tweet_length_counter"></span></p>
+					
+				 </div>
+			  </div>
+			</div>
+			
+			<input type="hidden" name="displayName" th:value="${#object.displayName}" />
+			
+			<input type="hidden" 
+			       name="tweet_value" 
+			       id="tweet_value"
+			    th:value="${#object.message}" />
+				   
+		    <div class="row">
+		      <div class="col-xs-11 col-sm-11">
+			    <div class="form-group" id="tweetPreviewDiv">
+				  <label class="tweet_preview_label" 
+					     for="tweet_preview"
+					     th:text="#{listing.new.form.label.tweetPreview}">Tweet preview</label>
+				  <textarea name="tweet_preview" 
+					        id="tweet_preview" 
+						    class="form-control" 
+						    rows="5"
+						    placeholder="Preview of how your tweet will appear on Twitter."
+						    disabled="disabled"></textarea>
+		        </div>
+		      </div>
+		    </div>
+
+		    <div class="row">
+		      <div class="col-xs-11 col-sm-11">
+			    <div class="form-group" id="facebookPreviewDiv">
+				  <label class="tweet_preview_label" 
+					     for="facebook_preview"
+					     th:text="#{listing.new.form.label.facebookPreview}">Facebook preview</label>
+				  <textarea name="facebook_preview" 
+						    id="facebook_preview" 
+						    class="form-control" 
+						    rows="5"
+						    placeholder="Preview of how your caption will appear on Facebook."
+						    disabled="disabled"></textarea>
+			    </div>
+			  </div>
+			</div>
+
+			<div class="row">
+			  <div class="col-xs-11 col-sm-11">
+				<div th:class="${#fields.hasErrors('termsAndConditions')} ? 'form-group has-error' : 'form-group'">
+					<label for="termsAndConditions">
+				    	<a href="#" id="termsAndConditionsPopover" 
+				    	   th:attr="data-original-title=#{listing.new.form.termsAndConditions.popover.title},data-content=#{listing.new.form.termsAndConditions.popover.text}"
+				    	   th:text="#{listing.new.form.termsAndConditions.label}">Terms and Conditions:</a>
+					</label>
+	
+					<textarea class="form-control required" 
+						      name="termsAndConditions" 
+						      id="termsAndConditions" 
+						      rows="5"
+						      th:text="${#object.termsAndConditions}"
+						      th:placeholder="#{listing.new.form.termsAndConditions.placeholder}"></textarea> 
+					<span th:if="${#fields.hasErrors('termsAndConditions')}" class="help-block" th:errors="*{termsAndConditions}">Invalid Terms and Conditions</span>
+				</div>
+			  </div>
+			</div>
+
+			
+			
+			<button type="button" class="btn btn-primary btn-lg pull-right" th:text="#{listing.new.form.continue.button.text}" id="continue">Continue</button>
+
+	       </div>
+
+			<div class="modal fade" id="digitalContentModal">
+			  <div class="modal-dialog modal-lg">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			        <h4 class="modal-title">Upload Files</h4>
+			      </div><!-- modal-header -->
+			      
+			      <div tiles:include="digitalContentModalBody">
+				  </div><!--  /modal-body -->
+					  
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
+			        <button type="submit" class="btn btn-primary btn-lg" th:text="#{listing.new.form.button.text}" id="submitSale">Create it</button>
+			      </div><!-- /.modal-footer -->
+			      
+			    </div><!-- /.modal-content -->
+			  </div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->
+			
+	   </form>
+		   
+	   <script th:inline="javascript">
+	   /*<![CDATA[*/
+	
+	      var twitterDisplayName = /*[[${twitterDisplayName}]]*/;
+	              
+	   /*]]>*/
+	   </script>
+	   
+		   
+	</div><!--/body-fragment-->
+
+</html>

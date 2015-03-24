@@ -1,0 +1,23 @@
+<ehcache>
+  <diskStore path="java.io.tmpdir"/>
+    <defaultCache
+         maxEntriesLocalHeap="10000"
+         eternal="false"
+         timeToIdleSeconds="60"
+         timeToLiveSeconds="60"
+         maxEntriesLocalDisk="10000000"
+         diskExpiryThreadIntervalSeconds="60"
+         memoryStoreEvictionPolicy="LRU">
+       <persistence strategy="localTempSwap"/>
+     </defaultCache>
+     <cache name="campaigns"
+            maxBytesLocalHeap="1m"
+            timeToLiveSeconds="60">
+            <sizeOfPolicy maxDepth="1000" maxDepthExceededBehavior="abort"/>
+     </cache>
+     <cache name="listings"
+            maxBytesLocalHeap="10m"
+            timeToLiveSeconds="60">
+            <sizeOfPolicy maxDepth="1000" maxDepthExceededBehavior="abort"/>
+     </cache>
+</ehcache>

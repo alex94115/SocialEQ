@@ -1,0 +1,6 @@
+/target
+/src/main/resources/localhost-spring-batch.properties
+/src/main/resources/prod-spring-batch.properties
+/src/main/resources/test-spring-batch.properties
+.settings/com.springsource.sts.config.flow.prefs
+.pmd

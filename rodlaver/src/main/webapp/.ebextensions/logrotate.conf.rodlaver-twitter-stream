@@ -1,0 +1,10 @@
+/var/log/rodlaver-twitter-stream/stream.out {
+    size 1M
+    missingok
+    rotate 24
+    compress
+    notifempty
+    copytruncate
+    dateext
+    dateformat -%s
+}

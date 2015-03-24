@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+<!--              -->
+<!-- Head section -->
+<!--              -->
+<head tiles:fragment="header">
+ 	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta name="description" content="" />
+	<meta name="viewport" content="initial-scale=1.0, width=device-width, maximum-scale=1.0, user-scalable=yes" />
+	
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+	      name="twitter:card" 
+	      th:content="${'product'}" 
+	      content="product" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+	      name="twitter:site" 
+		  th:content="${'@socialeq'}" 
+	      content="@site_username" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  name="twitter:creator" 
+		  th:content="${saleInfo.seller.screenFormattedUsername}" 
+		  content="@creator_username" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  name="twitter:title" 
+		  th:content="${saleInfo.title}" 
+		  content="Top 10 Things Ever" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  name="twitter:description" 
+		  th:content="${saleInfo.truncatedLongDescription}" 
+		  content="Long description of up to 200 characters." />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  name="twitter:image:src" 
+		  th:content="${cloudfrontPublicBaseUrl + saleInfo.imageFilename}" 
+		  content="http://placekitten.com/250/250" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  name="twitter:image:width" 
+		  th:content="${saleInfo.imageWidth}" 
+		  content="200" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  name="twitter:image:height" 
+		  th:content="${saleInfo.imageHeight}" 
+		  content="200" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail') and #strings.equals(saleInfo.goodsType,'DIGITAL')}" 
+		  name="twitter:data1" 
+		  content="Digital Download" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail') and #strings.equals(saleInfo.goodsType,'PHYSICAL')}" 
+		  name="twitter:data1" 
+		  content="Physical Item" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail') and #strings.equals(saleInfo.goodsType,'VOUCHER')}" 
+		  name="twitter:data1" 
+		  content="Voucher / Coupon" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  name="twitter:label1" 
+		  th:content="#{sale.detail.header.twitter.label1}" 
+		  content="Type" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')} and ${saleInfo.amount}" 
+		  name="twitter:data2" 
+		  th:content="'$' + ${#numbers.formatDecimal(saleInfo.amount, 0, 'COMMA', 2, 'POINT')}" 
+		  content="$5 USD" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')} and ${saleInfo.amount}" 
+		  name="twitter:label2" 
+		  th:content="#{sale.detail.header.twitter.label2.price}" 
+		  content="Price" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')} and ${saleInfo.amount == null}" 
+		  name="twitter:data2" 
+		  th:content="${saleInfo.keyword}" 
+		  content="YES" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')} and ${saleInfo.amount == null}" 
+		  name="twitter:label2" 
+		  th:content="#{sale.detail.header.twitter.label2.keyword}" 
+		  content="Hashtag" />
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  name="twitter:domain" 
+		  th:content="${@urlService.getApplicationUrl()}" 
+		  content="YourDomain.com" />
+	
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  property="fb:app_id" 
+		  th:content="${@urlService.getFacebookAppId()}"/> 
+  	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+  		  property="og:type" 
+  		  content="product" /> 
+  	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+  		  property="og:url" 
+  		  th:content="@{ ${@urlService.getApplicationUrl()} + '/listing/listingDetail/' + ${saleInfo.id}}" /> 
+  	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+  		  property="og:title" 
+  		  th:content="${saleInfo.title}" 
+  		  content="Top 10 Things Ever" />
+  	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+  		  property="og:image" 
+  		  th:content="${cloudfrontPublicBaseUrl + saleInfo.imageFilename}" /> 
+	<meta th:if="${#strings.equals(activePage,'listing.listingDetail')}" 
+		  property="og:description" 
+		  th:content="${saleInfo.longDescription}" 
+		  content="Long description of up to 200 characters." />
+	
+	<meta th:if="${#strings.equals(activePage,'signin.signin')}" 
+		  property="fb:app_id" 
+		  th:content="${@urlService.getFacebookAppId()}" /> 
+  	<meta th:if="${#strings.equals(activePage,'signin.signin')}" 
+  		  property="og:url" 
+  		  th:content="@{ ${@urlService.getApplicationUrl()} + '/signin' }" />  
+  	<meta th:if="${#strings.equals(activePage,'signin.signin')}" 
+  		  property="og:title" 
+  		  content="Sign In" />
+  	<meta th:if="${#strings.equals(activePage,'signin.signin')}" 
+  		  property="og:image" 
+  		  th:content="@{/resources/images/site/mstile-310x310.png}" /> 
+	<meta th:if="${#strings.equals(activePage,'signin.signin')}" 
+		  property="og:description" 
+		  content="SocialEQ is a tool enabling artists and businesses to interact with their fans on social media." />
+		  
+	<meta th:if="${isMusicianRegistrationLandingPage}" 
+		  property="fb:app_id" 
+		  th:content="${@urlService.getFacebookAppId()}" /> 
+  	<meta th:if="${isMusicianRegistrationLandingPage}" 
+  		  property="og:type" 
+  		  content="article" /> 
+  	<meta th:if="${isMusicianRegistrationLandingPage}" 
+  		  property="og:url" 
+  		  th:content="@{ ${@urlService.getApplicationUrl()}  + '/registration/musician'}" /> 
+  	<meta th:if="${isMusicianRegistrationLandingPage}" 
+  		  property="og:title" 
+  		  content="Sell your music direct using Facebook and Twitter" />
+  	<meta th:if="${isMusicianRegistrationLandingPage}" 
+  		  property="og:image" 
+  		  th:content="@{ ${@urlService.getApplicationUrl()} + '/resources/images/site/musician-registration-call-to-action.png'}" /> 
+	<meta th:if="${isMusicianRegistrationLandingPage}" 
+		  property="og:description" 
+		  content="SocialEQ is the new way to sell your music directly to your fans using Facebook and Twitter, with fees that are up to 67% lower than iTunes or Bandcamp." />
+	
+	<meta name="google-site-verification" content="PJIua6W4Pds4tu21_qFn8lAZg3Ss7wkUy7wlg2XbRhU" />	  
+	
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+	
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css?v=1" rel="stylesheet" />
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css?v=1" rel="stylesheet" />
+	
+	<link rel="stylesheet" media="screen" th:href="@{/resources/css/reset.css}" />
+
+<!-- 	<link rel="stylesheet/less" type="text/css" media="screen" th:if="${isLessDevelopmentMode}" th:href="@{/resources/css/style.less}" /> -->
+	<link rel="stylesheet" media="screen" th:href="@{/resources/css/style.css}" />
+
+
+	<link th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }" 
+	      rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css" />
+	
+	<link th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }" 
+	      rel="stylesheet" media="screen" th:href="@{/resources/css/jquery.fileupload-ui.css}" />
+	<link th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }" 
+	      rel="stylesheet" media="screen" th:href="@{/resources/css/jquery.fileupload.css}" />
+	
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css' />
+	
+	<link rel="shortcut icon" type="image/x-icon" th:href="@{/resources/images/site/favicon.ico}" />
+	<link rel="apple-touch-icon" sizes="57x57" href="#" th:href="@{/resources/images/site/apple-touch-icon-57x57.png}" />
+	<link rel="apple-touch-icon" sizes="114x114" href="#" th:href="@{/resources/images/site/apple-touch-icon-114x114.png}" />
+	<link rel="apple-touch-icon" sizes="72x72" href="#" th:href="@{/resources/images/site/apple-touch-icon-72x72.png}" />
+	<link rel="apple-touch-icon" sizes="144x144" href="#" th:href="@{/resources/images/site/apple-touch-icon-144x144.png}" />
+	<link rel="apple-touch-icon" sizes="60x60" href="#" th:href="@{/resources/images/site/apple-touch-icon-60x60.png}" />
+	<link rel="apple-touch-icon" sizes="120x120" href="#" th:href="@{/resources/images/site/apple-touch-icon-120x120.png}" />
+	<link rel="apple-touch-icon" sizes="76x76" href="#" th:href="@{/resources/images/site/apple-touch-icon-76x76.png}" />
+	<link rel="apple-touch-icon" sizes="152x152" href="#" th:href="@{/resources/images/site/apple-touch-icon-152x152.png}" />
+	<link rel="icon" type="image/png" href="#" th:href="@{/resources/images/site/favicon-196x196.png}" sizes="196x196" />
+	<link rel="icon" type="image/png" href="#" th:href="@{/resources/images/site/favicon-160x160.png}" sizes="160x160" />
+	<link rel="icon" type="image/png" href="#" th:href="@{/resources/images/site/favicon-96x96.png}" sizes="96x96" />
+	<link rel="icon" type="image/png" href="#" th:href="@{/resources/images/site/favicon-16x16.png}" sizes="16x16" />
+	<link rel="icon" type="image/png" href="#" th:href="@{/resources/images/site/favicon-32x32.png}" sizes="32x32" />
+	<meta name="msapplication-TileColor" content="#2b5797" />
+	<meta name="msapplication-TileImage" content="/mstile-144x144.png" />
+	
+	
+	<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <link rel="stylesheet" th:href="@{/resources/css/ie.css}">
+    <![endif]-->
+	
+	<style th:if="${backgroundImageUrl}"  th:inline="text" type="text/css">
+		body {
+			background-image: url([[${backgroundImageUrl}]]);
+		}
+	</style>
+	
+	<title th:text="#{${activePage + '.title'}} + ( ${saleInfo} ? ': ' + ${saleInfo.title} : '' )">Title</title>
+</head>
+
+<body>
+
+	<!--               -->
+	<!-- Alert Drawer  -->
+	<!--               -->
+
+  	<div tiles:fragment="alert-drawer">
+		<div th:if="${userInterfaceMessages} and ${userInterfaceMessages.hasMessages()}" th:switch="${userInterfaceMessages.getHighestPriorityLevel()}">
+		  <div class="col-xs-1"></div>
+		  <div class="col-xs-10">
+			<div th:case="'alert-error'">
+				<div class="alert alert-danger fade in" >
+			  		<button type="button" class="close" aria-hidden="true" data-dismiss="alert">&times;</button>
+		  			<div>
+		  			  <strong>Oops!</strong> <span th:text="${userInterfaceMessages.getHighestPriorityMessage()}"></span>
+					</div>
+		  		</div>
+			</div>
+			<div th:case="'alert-success'">
+				<div class="alert alert-success fade in" >
+			  		<button type="button" class="close" aria-hidden="true" data-dismiss="alert">&times;</button>
+		  			<div>
+		  			  <strong>Good news!</strong> <span th:text="${userInterfaceMessages.getHighestPriorityMessage()}"></span>
+					</div>
+		  		</div>
+			</div>
+			<div th:case="'alert-info'">
+				<div class="alert alert-info fade in" >
+			  		<button type="button" class="close" aria-hidden="true" data-dismiss="alert">&times;</button>
+		  			<div>
+		  			  <strong>FYI!</strong> <span th:text="${userInterfaceMessages.getHighestPriorityMessage()}"></span>
+					</div>
+		  		</div>
+			</div>
+		  </div>
+		</div> 
+		<div class="col-xs-1"></div>
+	</div>
+
+	<!--                        -->
+	<!-- Authentication Banner  -->
+	<!--                        -->
+	<div tiles:fragment="authentication-banner">
+	  <div class="col-xs-1 col-sm-1 flush">
+	    <div class="navbar navbar-default navbar-static-top">
+	      <div class="container">
+	        <div class="navbar-collapse collapse">
+	          <ul class="nav navbar-nav">
+	            <li><a>&nbsp;</a></li>
+	          </ul>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+      <div class="col-xs-3 col-sm-2 logo-container">
+      	<a href="#" th:href="@{/}">
+      	  <img class="top-logo" src="#" th:src="@{/resources/images/site/SocialEQ-logo-sm.png}" />
+      	</a>
+      </div>
+      <div class="col-xs-8 col-sm-9 flush">
+          <nav class="navbar navbar-default navbar-static-top" role="navigation">
+		      <div th:unless="${#strings.contains(activePage,'signin') or #strings.contains(activePage,'registration')}"
+		           class="container-fluid">
+		          <div class="navbar-header">
+		             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+		               <span class="sr-only">Toggle navigation</span>
+		               <span class="icon-bar"></span>
+		               <span class="icon-bar"></span>
+		               <span class="icon-bar"></span>
+		            </button>
+		          </div>
+		          <div class="navbar-collapse collapse" id="navbar-collapse-1">
+		            <ul class="nav navbar-nav nav-left" tiles:include="leftnav"></ul>
+		            <ul class="nav navbar-nav navbar-right">
+					  <li th:unless="${isUserLoggedIn}">
+					    <a th:href="@{/signin}"><button type="button" class="btn btn-primary btn-xs">Sign in</button></a>
+					  </li>
+		              <li>
+ 		                <img class="img-responsive toplogin hidden-xs" src="#" style="height: 20px;"
+ 		                   th:if="${isUserLoggedIn}"
+					       th:src="@{${#strings.replace(currentUser.profileImageUrl,'http','https')}}" alt="Profile image"/>
+		              </li>
+		              <li th:if="${isUserLoggedIn and #strings.contains(#authentication.name,'twitter/')}">
+						<a href="#" 
+						   th:class="${#strings.containsIgnoreCase(activePage,'user.profile')} ? 'active' : 'inactive'"
+						   th:href="@{/user/profile}" th:text="${#strings.replace(#authentication.name,'twitter/','@') }">'username'.</a>
+	 			      </li>
+	 			      <li th:if="${isUserLoggedIn and #strings.contains(#authentication.name,'facebook/')}">
+	 			         <a href="#" 
+						   th:class="${#strings.containsIgnoreCase(activePage,'user.profile')} ? 'active' : 'inactive'"
+						   th:href="@{/user/profile}" th:text="${#strings.replace(#authentication.name,'facebook/','') }">'username'.</a>
+		              </li>
+           			  <li>
+           			    <form th:if="${isUserLoggedIn}" action="#" th:action="@{/signout}" method="post">
+           			      <button type="submit" class="btn btn-primary btn-xs">Logout</button>
+           			    </form>
+           			  </li>
+           			</ul>
+		          </div>
+		      </div>
+		    </nav>
+      
+      </div>
+	</div>
+	
+	<!--                      -->
+	<!-- Content Page Navbar  -->
+	<!--                      -->
+	<div tiles:fragment="homepage-topleftnav">
+	  <li><a th:class="'visible-lg visible-xs ' + (${#strings.containsIgnoreCase(activePage,'sellOnFacebook')} ? 'active' : 'inactive')"
+		th:href="@{/sellOnFacebook}">SocialEQ: Sell on Facebook</a></li>
+      <li><a th:class="'visible-md ' + (${#strings.containsIgnoreCase(activePage,'sellOnFacebook')} ? 'active' : 'inactive')"
+		th:href="@{/sellOnFacebook}">Sell on Facebook</a></li>
+      <li><a th:class="'visible-sm ' + (${#strings.containsIgnoreCase(activePage,'sellOnFacebook')} ? 'active' : 'inactive')"
+		th:href="@{/sellOnFacebook}">Facebook Selling</a></li>
+ 	  <li><a th:class="'visible-lg visible-xs ' + (${#strings.containsIgnoreCase(activePage,'sellOnTwitter')} ? 'active' : 'inactive')"
+		th:href="@{/sellOnTwitter}">SocialEQ: Sell on Twitter</a></li>
+	  <li><a th:class="'visible-md ' + (${#strings.containsIgnoreCase(activePage,'sellOnTwitter')} ? 'active' : 'inactive')"
+		th:href="@{/sellOnTwitter}">Sell on Twitter</a></li>
+	  <li><a th:class="'visible-sm ' + (${#strings.containsIgnoreCase(activePage,'sellOnTwitter')} ? 'active' : 'inactive')"
+		th:href="@{/sellOnTwitter}">Twitter Selling</a></li>
+	  <li th:if="${application.doEnableDonations}">
+	    <a th:class="'visible-lg visible-xs ' + (${#strings.containsIgnoreCase(activePage,'donate')} ? 'active' : 'inactive')"
+		   th:href="@{/donate}">SocialEQ: Donations</a>
+	  </li>
+	  <li th:if="${application.doEnableDonations}">
+	    <a th:class="'visible-md visible-sm ' + (${#strings.containsIgnoreCase(activePage,'donate')} ? 'active' : 'inactive')"
+		   th:href="@{/donate}">Donations</a>
+	  </li>
+	  <li><a th:class="'visible-lg visible-xs ' + (${#strings.containsIgnoreCase(activePage,'contestsAndPromotions')} ? 'active' : 'inactive')"
+		th:href="@{/contestsAndPromotions}">SocialEQ: Promotions</a></li>
+	  <li><a th:class="'visible-md visible-sm ' + (${#strings.containsIgnoreCase(activePage,'contestsAndPromotions')} ? 'active' : 'inactive')"
+		th:href="@{/contestsAndPromotions}">Promotions</a></li>				
+	</div>
+	
+	<!--                          -->
+	<!-- Application Page Navbar  -->
+	<!--                          -->
+	<div tiles:fragment="application-topleftnav">
+		<li th:if="${#authorization.expression('hasRole(''ROLE_BUYER'') and !hasRole(''ROLE_SELLER'')')}">
+		    <a href="#" 
+		       th:class="${#strings.containsIgnoreCase(activePage,'userHome')} ? 'active' : 'inactive'"
+		       th:href="@{'/userHome'}" th:inline="text">[[#{sidebar.userHome}]]</a>
+		</li>
+		<li th:if="${#authorization.expression('hasRole(''ROLE_SELLER'')')}">
+			<a href="#" 
+			   th:href="@{/analytics/overview/week}" 
+			   th:class="${#strings.containsIgnoreCase(activePage,'analytics.overview')} ? 'active' : 'inactive'"
+			   th:inline="text">[[#{sidebar.sellerOverview}]]</a>
+		</li>
+		<li th:if="${#authorization.expression('hasRole(''ROLE_SELLER'')')}">
+			<a href="#" th:href="@{/listing/newListing}" 
+			   th:class="${#strings.containsIgnoreCase(activePage,'listing.new')} ? 'active' : 'inactive'" 
+			   th:inline="text">[[#{sidebar.newSale}]]</a>
+		</li>
+		<li th:if="${#authorization.expression('hasRole(''ROLE_SELLER'')')}">
+			<a href="#" th:href="@{${'/listing/listingHistory/0'}(page=0,size=10)}" 
+			   th:class="${#strings.containsIgnoreCase(activePage,'listing.listingHistory')} ? 'active' : 'inactive'"
+			   th:inline="text">[[#{sidebar.manageSales}]]</a>
+		</li>
+		<li th:if="${#authorization.expression('hasRole(''ROLE_BUYER'')')}">
+			<a href="#" 
+			   th:class="${#strings.containsIgnoreCase(activePage,'listing.transactionHistory')} ? 'active' : 'inactive'"
+			   th:href="@{${'/listing/transactionHistory/0'}(page=0,size=10)}" th:inline="text">[[#{sidebar.history}]]</a>
+		</li>
+		<li th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+			<a href="#" 
+			   th:class="${#strings.containsIgnoreCase(activePage,'user.admin')} ? 'active' : 'inactive'"
+			   th:href="@{/user/userAdminSearch}" th:inline="text">[[#{sidebar.userAdmin}]]</a>
+		</li>	
+	</div>
+	
+	<!--                                     -->
+	<!-- Footer Navbar and Google Analytics  -->
+	<!--                                     -->
+	<div tiles:fragment="footer-band">
+		 <script th:inline="javascript" th:if="${doEnableGoogleAnalytics}">
+		/*<![CDATA[*/
+			  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			
+			  ga('create', 'UA-51087403-1', 'auto');
+			  ga('require', 'linkid', 'linkid.js');
+			  ga('send', 'pageview');
+		
+	    /*]]>*/
+		</script>
+	
+		<div class="container">
+		  <div class="row">
+			<div class="col-md-8">
+				<ul class="footnav">
+					<li><a th:href="@{/about}" href="#">About</a></li>
+					<li><a th:href="@{/support}" href="#">Support</a></li>
+					<li><a th:href="@{/privacy}" href="#">Privacy Policy</a></li>
+					<li><a th:href="@{/terms}" href="#">Terms &amp; Conditions</a></li>
+					<li><a th:href="@{/faq}" href="#">FAQ's</a></li>
+				</ul>
+			</div>
+
+			<div class="col-md-4">
+				<ul class="footnav">
+					<li><a href="https://twitter.com/socialeq"><i class="fa fa-twitter"></i></a></li>
+					<li><a href="https://www.facebook.com/"><i class="fa fa-facebook"></i></a></li>
+				</ul>
+			</div>
+		  </div>
+		</div>
+	</div>
+
+	<!--                      -->
+	<!-- JavaScript scripts   -->
+	<!--                      -->
+	<div tiles:fragment="scripts">
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js?v=1"></script>
+		<script src="#"	th:src="@{/resources/js/vendor/jquery.cookie-1.4.0.js}"></script>
+		<script	src="#"	th:src="@{/resources/js/hootit.js}"></script>
+		
+		<script src="#" th:if="${isLessDevelopmentMode}" th:src="@{/resources/js/vendor/less-1.7.0.js}"></script>
+
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }" 
+		        src="#" th:src="@{/resources/js/vendor/load-image.min.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }" 
+		        src="#" th:src="@{/resources/js/vendor/jquery-1.10.4.ui.widget.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+		        src="#" th:src="@{/resources/js/vendor/jquery.iframe-transport-1.8.2.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+		        src="#" th:src="@{/resources/js/vendor/jquery.fileupload-5.40.1.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+		        src="#" th:src="@{/resources/js/vendor/jquery.fileupload-process.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+		        src="#" th:src="@{/resources/js/vendor/jquery.fileupload-image.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+		        src="#" th:src="@{/resources/js/vendor/jquery.fileupload-audio.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+		        src="#" th:src="@{/resources/js/vendor/jquery.fileupload-video.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+		        src="#" th:src="@{/resources/js/vendor/jquery.fileupload-validate.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+		        src="#" th:src="@{/resources/js/vendor/jquery.fileupload-ui.js}"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.new') or #strings.containsIgnoreCase(activePage,'registration.createListing') }"
+				src="#" th:src="@{/resources/js/fileupload-main.js}"></script>
+
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.listingDetail')}" 
+				src="#" th:src="@{/resources/js/listing-detail.js}"></script> 
+		<script th:if="${#strings.containsIgnoreCase(activePage, 'listing.listingDetail')}" 
+				src="//js.braintreegateway.com/v2/braintree.js"></script>
+		<script th:if="${#strings.containsIgnoreCase(activePage, 'listing.listingDetail')} and ${doUseStripe}" 
+				src="//checkout.stripe.com/checkout.js"></script>
+		
+		
+		<script th:if="#{strings.containsIgnoreCase(activePage, 'listing.transactionDetail')}" 
+				th:src="@{/resources/js/vendor/jquery.multiDownload.js}"></script> 
+				
+		<script th:if="${#strings.containsIgnoreCase(activePage,'sellerHome')}" src="#" 
+		        th:src="@{/resources/js/vendor/jquery.infinitescroll.min.js}"></script>
+		
+		<script th:if="${#strings.containsIgnoreCase(activePage,'listing.commentInstructions')}" 
+		        src="//platform.twitter.com/widgets.js"></script>
+						
+		
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+		
+			$(document).ready(function() {
+				
+				$.ajaxSetup({ cache: true });
+				$.getScript( "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js", function() {} );
+				$.getScript( "//cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js", function() {} );
+				$.getScript( /*[[@{/resources/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js}]]*/, function() {} );
+				$.getScript( /*[[@{/resources/js/plugins.js}]]*/, function() {} );
+				$.getScript( "//connect.facebook.net/en_US/all.js", function() {} );
+				
+				hootit.setIsUserLoggedIn( /*[[${isUserLoggedIn}]]*/ 
+						);
+				
+ 				//hootit.init();				
+			});
+		
+		/*]]>*/
+		</script>
+	</div>
+	
+  	<!--                  -->
+	<!-- Pagination Bar   -->
+	<!--                  -->
+    <div tiles:fragment="pagination">
+      <!-- Pagination Bar -->
+      <div th:if="${page.totalPages > 1 }">
+        <ul class="pagination pull-right" >
+          <li th:class="${page.isFirst()}? 'disabled' : ''">
+            <span th:if="${page.isFirst()}" th:text="#{pagination.bar.navigate.first}">← First</span>
+            <a th:if="${not page.isFirst()}" th:href="@{${'0'}(page=0,size=${page.size})}">
+              <span th:text="#{pagination.bar.navigate.first}">← First</span>
+            </a>
+          </li>
+          <li th:class="${page.hasPrevious()}? '' : 'disabled'">
+            <span th:if="${not page.hasPrevious()}" th:text="#{pagination.bar.navigate.previous}">«</span>
+            <a th:if="${page.hasPrevious()}" th:href="@{'' + ${pageId-1}(page=${pageId-1},size=${page.size})}" title="Go to previous page">
+              <span th:text="#{pagination.bar.navigate.previous}">«</span>
+            </a>
+          </li>
+          <li th:each="i: ${#numbers.sequence( 0, page.totalPages - 1)}" th:class="${i == page.number}? 'active' : ''">
+            <span th:if='${i == page.number}' th:text="${i + 1}">1</span>
+            <a th:if='${i != page.number}' th:href="@{'' + ${i}(page=${i},size=${page.size})}">
+              <span th:text="${i + 1}">1</span>
+            </a>
+          </li>
+          <li th:class="${page.hasNext()}? '' : 'disabled'">
+            <span th:if="${not page.hasNext()}" th:text="#{pagination.bar.navigate.next}">»</span>
+            <a th:if="${page.hasNext()}" th:href="@{'' + ${pageId+1}(page=${pageId+1},size=${page.size})}" id="nextPage" title="Go to next page">
+              <span th:text="#{pagination.bar.navigate.next}">»</span>
+            </a>
+          </li>
+          <li th:class="${page.isLast()}? 'disabled' : ''">
+            <span th:if="${page.isLast()}" th:text="#{pagination.bar.navigate.last}">Last →</span>
+            <a th:if="${not page.isLast()}" th:href="@{'' + ${page.totalPages - 1}(page=${page.totalPages - 1},size=${page.size})}">
+              <span th:text="#{pagination.bar.navigate.last}">Last →</span>
+            </a>
+          </li>
+        </ul>
+      </div>  
+    </div>
+  
+  	<!--                                  -->
+	<!--   Listing Detail Metrics Table   -->
+	<!--                                  -->
+	<div tiles:fragment="listingDetailMetricsTable">
+	  
+      <div class="table-responsive">
+    	<!-- Table -->
+	    <table class="table table-condensed table-bordered">
+	      <thead>
+	       <tr>
+	         <th>&nbsp;</th>
+	         <th colspan="3"><strong>Activity</strong></th>
+	         <th colspan="4" th:colspan="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN') ? '1' : '3'}"><strong>Conversions</strong></th>
+	       </tr>
+	       <tr>
+	         <th>&nbsp;</th> 
+	         <th><strong>Responses</strong></th> 
+	         <th><strong>#hashtag<br/>Responses</strong></th> 
+	         <th><strong>Retweets</strong></th> 
+	         <th th:if="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	           <strong>Entries</strong>
+	         </th> 
+	         <th th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	           <strong>Payments</strong>
+	         </th> 
+	         <th th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	           <strong>Gross Sales</strong>
+	         </th> 
+	         <th th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	           <strong>Net Sales</strong>
+	         </th> 
+	       </tr>
+	      </thead>
+<!-- 	      <tbody th:object="${metrics} ? ${metrics} : ${metricsMap[listing.id]}"> -->
+			<tbody th:object="${metrics} ?: ${metricsMap[listing.id]}">
+	        <tr class="active">
+	          <td>&nbsp;</td>
+	          <td th:text="*{responses}">105</td>
+	          <td th:text="*{hashtagResponses}">105</td>
+	          <td th:text="*{retweets}">35</td>
+	          <td th:if="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}" th:text="*{optIns}">105</td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}" th:text="*{payments}">105</td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}" >
+	            <span th:unless="${#object.grossSales}">$0.00</span>
+	            <span th:if="${#object.grossSales}" th:text="'$' + ${#numbers.formatDecimal(#object.grossSales, 0, 'COMMA', 2, 'POINT')}">$99.00</span>
+	          </td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}" >
+	            <span th:unless="${#object.netSales}">$0.00</span>
+	            <span th:if="${#object.netSales}" th:text="'$' + ${#numbers.formatDecimal(#object.netSales, 0, 'COMMA', 2, 'POINT')}">$99.00</span>
+	          </td>
+	        </tr>
+	        <tr th:if="${listing.doPostToTwitter}">
+	          <td><strong>Twitter</strong></td>
+	          <td>
+	            <span th:text="*{twitterResponses}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterResponsesRatio}" th:text="*{twitterResponsesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:text="*{twitterHashtagResponses}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterHashtagResponsesRatio}" th:text="*{twitterHashtagResponsesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:text="*{retweets}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterRetweetsRatio}" th:text="*{twitterRetweetsRatio}">33%</span>
+	          </td>
+	          <td th:if="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	            <span th:text="*{twitterOptIns}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterOptInsRatio}" th:text="*{twitterOptInsRatio}">33%</span></td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	            <span th:text="*{twitterPayments}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterPaymentsRatio}" th:text="*{twitterPaymentsRatio}">33%</span></td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	            <span th:unless="${#object.twitterGrossSales}">$0.00</span>
+	            <span th:if="${#object.twitterGrossSales}" th:text="'$' + ${#numbers.formatDecimal(#object.twitterGrossSales, 0, 'COMMA', 2, 'POINT')}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterGrossSalesRatio}" th:text="*{twitterGrossSalesRatio}">33%</span>
+	          </td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	            <span th:unless="${#object.twitterNetSales}">$0.00</span>
+	            <span th:if="${#object.twitterNetSales}" th:text="'$' + ${#numbers.formatDecimal(#object.twitterNetSales, 0, 'COMMA', 2, 'POINT')}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterNetSalesRatio}" th:text="*{twitterNetSalesRatio}">33%</span>
+	          </td>
+	        </tr>
+	        <tr th:unless="${listing.doPostToTwitter}">
+	          <td><strong>Twitter</strong></td>
+	          <td>N/A</td>
+	          <td>N/A</td>
+	          <td>N/A</td>
+	          <td th:if="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">N/A</td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">N/A</td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">N/A</td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">N/A</td>
+	        </tr>
+	        <tr th:if="${listing.doPostToFacebook}">
+	          <td><strong>Facebook</strong></td>
+	          <td>
+	            <span th:text="*{facebookResponses}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookResponsesRatio}" th:text="*{facebookResponsesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:text="*{facebookHashtagResponses}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookHashtagResponsesRatio}" th:text="*{facebookHashtagResponsesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span>N/A</span>
+	          </td>
+	          <td th:if="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	            <span th:text="*{facebookOptIns}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookOptInsRatio}" th:text="*{facebookOptInsRatio}">33%</span></td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	            <span th:text="*{facebookPayments}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookPaymentsRatio}" th:text="*{facebookPaymentsRatio}">33%</span></td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	            <span th:unless="${#object.facebookGrossSales}">$0.00</span>
+	            <span th:if="${#object.facebookGrossSales}" th:text="'$' + ${#numbers.formatDecimal(#object.facebookGrossSales, 0, 'COMMA', 2, 'POINT')}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookGrossSalesRatio}" th:text="*{facebookGrossSalesRatio}">33%</span>
+	          </td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">
+	          <span th:unless="${#object.facebookNetSales}">$0.00</span>
+	            <span th:if="${#object.facebookNetSales}" th:text="'$' + ${#numbers.formatDecimal(#object.facebookNetSales, 0, 'COMMA', 2, 'POINT')}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookNetSalesRatio}" th:text="*{facebookNetSalesRatio}">33%</span>
+	          </td>
+	        </tr>
+	        <tr th:unless="${listing.doPostToFacebook}">
+	          <td><strong>Facebook</strong></td>
+	          <td>N/A</td>
+	          <td>N/A</td>
+	          <td>N/A</td>
+	          <td th:if="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">N/A</td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">N/A</td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">N/A</td>
+	          <td th:unless="${#strings.containsIgnoreCase(listing.type,'CAMPAIGN')}">N/A</td>
+	        </tr>
+	      </tbody>
+	    </table>
+      </div>
+    </div>
+    
+    <!--                                    -->
+	<!--   Listing Overview Metrics Table   -->
+	<!--                                    -->
+	<div tiles:fragment="listingOverviewMetricsTable">
+	  
+      <div class="table-responsive">
+    	<!-- Table -->
+	    <table class="table table-condensed table-bordered">
+	      <thead>
+	       <tr>
+	         <th>&nbsp;</th>
+	         <th colspan="3"><strong>Activity</strong></th>
+	         <th colspan="4"><strong>Conversions</strong></th>
+	       </tr>
+	       <tr>
+	         <th>&nbsp;</th> 
+	         <th><strong>Responses</strong></th> 
+	         <th><strong>#hashtag<br/>Responses</strong></th> 
+	         <th><strong>Retweets</strong></th> 
+	         <th>
+	           <strong>Entries</strong>
+	         </th> 
+	         <th>
+	           <strong>Payments</strong>
+	         </th> 
+	         <th>
+	           <strong>Gross Sales</strong>
+	         </th> 
+	         <th>
+	           <strong>Net Sales</strong>
+	         </th> 
+	       </tr>
+	      </thead>
+	      <tbody th:object="${metrics}">
+	        <tr class="active">
+	          <td>&nbsp;</td>
+	          <td th:text="*{responses}">105</td>
+	          <td th:text="*{hashtagResponses}">105</td>
+	          <td th:text="*{retweets}">35</td>
+	          <td th:text="*{optIns}">105</td>
+	          <td th:text="*{payments}">105</td>
+	          <td>
+	            <span th:if="${#object.grossSales}" th:text="'$' + ${#numbers.formatDecimal(#object.grossSales, 0, 'COMMA', 2, 'POINT')}">$99.00</span>
+	          </td>
+	          <td>
+	            <span th:if="${#object.netSales}" th:text="'$' + ${#numbers.formatDecimal(#object.netSales, 0, 'COMMA', 2, 'POINT')}">$99.00</span>
+	          </td>
+	        </tr>
+	        <tr>
+	          <td><strong>Twitter</strong></td>
+	          <td>
+	            <span th:text="*{twitterResponses}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterResponsesRatio}" th:text="*{twitterResponsesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:text="*{twitterHashtagResponses}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterHashtagResponsesRatio}" th:text="*{twitterHashtagResponsesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:text="*{retweets}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterRetweetsRatio}" th:text="*{twitterRetweetsRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:text="*{twitterOptIns}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterOptInsRatio}" th:text="*{twitterOptInsRatio}">33%</span></td>
+	          <td>
+	            <span th:text="*{twitterPayments}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterPaymentsRatio}" th:text="*{twitterPaymentsRatio}">33%</span></td>
+	          <td>
+	            <span th:unless="${#object.twitterGrossSales}">$0.00</span>
+	            <span th:if="${#object.twitterGrossSales}" th:text="'$' + ${#numbers.formatDecimal(#object.twitterGrossSales, 0, 'COMMA', 2, 'POINT')}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterGrossSalesRatio}" th:text="*{twitterGrossSalesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:unless="${#object.twitterNetSales}">$0.00</span>
+	            <span th:if="${#object.twitterNetSales}" th:text="'$' + ${#numbers.formatDecimal(#object.twitterNetSales, 0, 'COMMA', 2, 'POINT')}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{twitterNetSalesRatio}" th:text="*{twitterNetSalesRatio}">33%</span>
+	          </td>
+	        </tr>
+	        <tr>
+	          <td><strong>Facebook</strong></td>
+	          <td>
+	            <span th:text="*{facebookResponses}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookResponsesRatio}" th:text="*{facebookResponsesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:text="*{facebookHashtagResponses}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookHashtagResponsesRatio}" th:text="*{facebookHashtagResponsesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span>N/A</span>
+	          </td>
+	          <td>
+	            <span th:text="*{facebookOptIns}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookOptInsRatio}" th:text="*{facebookOptInsRatio}">33%</span></td>
+	          <td>
+	            <span th:text="*{facebookPayments}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookPaymentsRatio}" th:text="*{facebookPaymentsRatio}">33%</span></td>
+	          <td>
+	            <span th:unless="${#object.facebookGrossSales}">$0.00</span>
+	            <span th:if="${#object.facebookGrossSales}" th:text="'$' + ${#numbers.formatDecimal(#object.facebookGrossSales, 0, 'COMMA', 2, 'POINT')}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookGrossSalesRatio}" th:text="*{facebookGrossSalesRatio}">33%</span>
+	          </td>
+	          <td>
+	            <span th:unless="${#object.facebookNetSales}">$0.00</span>
+	            <span th:if="${#object.facebookNetSales}" th:text="'$' + ${#numbers.formatDecimal(#object.facebookNetSales, 0, 'COMMA', 2, 'POINT')}">35</span>&nbsp;
+	            <span class="badge pull-right" th:if="*{facebookNetSalesRatio}" th:text="*{facebookNetSalesRatio}">33%</span>
+	          </td>
+	        </tr>
+	      </tbody>
+	    </table>
+      </div>
+    </div>
+    
+    <div tiles:fragment="digitalContentModalBody">
+      <div class="modal-body">
+			      
+        <div class="row">
+		  <div class="col-sm-11">
+		    <div class="form-group has-error bg-danger" th:if="${#fields.hasErrors('digitalContent')} or ${#fields.hasErrors('image')}">
+			  <button type="button" class="close" aria-hidden="true" data-dismiss="alert">&times;</button>
+			  <strong>Error:</strong>
+			  <ul>
+				<li th:each="err : ${#fields.errors('image')}" th:text="${err}">Input is incorrect</li>
+			  </ul>
+			  <ul>
+				<li th:each="err : ${#fields.errors('digitalContent')}" th:text="${err}">Input is incorrect</li>
+			  </ul>
+		    </div>
+		  </div>
+	    </div>
+	    				
+		<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+	    <div class="row fileupload-buttonbar">
+	      <div class="col-sm-11">
+	        <label>
+		      <a href="#" id="imagePreviewPopover" 
+	    	     th:attr="data-original-title=#{listing.new.form.image.popover.title},data-content=#{listing.new.form.image.popover.text}"
+	    	     th:text="#{listing.new.form.image.label}">Campaign Image (at least 300 x 300 pixels):</a>
+	        </label>
+	        <br />
+               <span class="btn btn-success fileinput-button">
+                 <span>Select Image...</span>
+                 <input type="file" name="image" />
+               </span>
+               
+               <div id="digitalContentDiv">
+	          <hr />
+	          <label>
+		        <a href="#" id="digitalContentPopover" 
+		    	     th:attr="data-original-title=#{listing.new.form.digitalContent.popover.title},data-content=#{listing.new.form.digitalContent.popover.text}"
+		    	     th:text="#{listing.new.form.digitalContent.label}">Digital Content:</a>
+	          </label>
+	          <br />
+	          <!-- The fileinput-button span is used to style the file input field as button -->
+	          <span class="btn btn-success fileinput-button">
+	            <i class="glyphicon glyphicon-plus"></i>
+	            <span>Add files...</span>
+	            <input type="file" name="contentFiles[]" multiple="multiple" />
+	          </span>
+	          <button type="button" class="btn btn-danger delete">
+	            <i class="glyphicon glyphicon-trash"></i>
+	            <span>Delete</span>
+	          </button>
+	          <input type="checkbox" class="toggle" />
+	          <!-- The global file processing state -->
+	          <span class="fileupload-process"></span>
+	          <div id="dropzone" class="fade well">Drag files here</div>
+	        </div>
+	      </div>
+	      
+	            
+	      <!-- The global progress state -->
+	      <div class="col-sm-5 fileupload-progress fade">
+	        <!-- The global progress bar -->
+	        <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+	          <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+	        </div>
+	        <!-- The extended global progress state -->
+	        <div class="progress-extended">&nbsp;</div>
+	      </div>
+	    </div>
+	    <!-- The table listing the files available for upload/download -->
+	    <table role="presentation" class="table table-striped">
+	      <tbody class="files" id="selectedFiles">
+	        <tr th:each="file : ${newListingDigitalContent.files}" class="template-download fade in">
+              <td>
+                <span class="preview">
+                  <a data-gallery="" th:href="${file.url}">
+                    <img th:src="${file.thumbnailUrl}" />
+                  </a>
+                </span>
+              </td>
+              <td>
+                <p class="name">
+                  <a data-gallery="" href="#" th:href="${file.url}" th:text="${file.name}"></a>
+                  <strong class="error text-danger" th:if="${file.error}" th:text="${file.error}"></strong>
+                </p>
+              </td>
+              <td>
+                <span class="size" th:text="${file.size}"></span>
+              </td>
+              <td>
+                <button class="btn btn-danger delete" th:attr="data-type=${file.deleteType},data-url=${file.deleteUrl}">
+                  <i class="glyphicon glyphicon-trash"></i>
+                  <span>Delete</span>
+                </button>
+                <input type="checkbox" name="delete" value="1" class="toggle" />
+              </td>
+            </tr>
+	      </tbody>
+	    </table>
+
+	  </div><!--  /modal-body -->
+    </div>
+  
+  
+    <!--   Placeholder tile -->
+    <div tiles:fragment="null"></div>
+  
+</body>
+</html>

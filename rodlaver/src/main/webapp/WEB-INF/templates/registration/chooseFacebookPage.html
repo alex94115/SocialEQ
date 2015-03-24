@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+	
+	 <div id="registration-wrapper">
+				  
+	   <div class="row">
+	     <div class="col-sm-12">
+	       <div class="headline">
+	         <h1>Confirm the Facebook Page You'd Like to Use</h1>
+	         <h2>This should be the page where your fans come to connect with you already.</h2>
+	       </div>
+	     </div>
+	   </div>
+	      
+	   <div class="row">
+	     <div class="col-sm-8">
+		
+			<form role="form"
+			      action="#" 
+		          th:action="@{/registration/chooseFacebookPage}"
+		          th:object="${chooseFacebookPage}" 
+		          method="post" 
+		          id="chooseFacebookPageForm">
+		      
+			  <div class="form-group" th:if="${managedPageOptions}">
+				<label class="control-label">Choose the Facebook Page You Want to Sell Via:</label>								
+				<select name="facebookPageId" id="facebookPageId">
+				  <option th:each="page : ${managedPageOptions}" 
+					      th:value="${page.key}" 
+					      th:text="${page.value}">Facebook Page</option>
+				</select>
+			  </div>
+			  
+			  <button type="submit" class="btn btn-primary">Continue</button>
+			  
+			</form>
+			
+			<p class="secondary-option">
+			  <a href="#" th:href="@{/registration/linkTwitter}">I don't want to sell on Facebook</a>
+			</p>
+			
+			<div style="margin-top: 50px;">
+		      <p>
+		        Got questions? You can reach us at <a href="mailto:support@socialeq.co">support@socialeq.co</a>
+		      </p>
+		    </div>
+			
+		  </div>
+		</div>
+	  </div>
+		
+	</div>
+</html>

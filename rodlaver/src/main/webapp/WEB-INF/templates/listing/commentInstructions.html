@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:tiles="http://www.thymeleaf.org">
+
+        <div tiles:fragment="body">
+        
+        	<div id="fb-root"></div>
+        	
+        	<script th:inline="javascript">
+			/*<![CDATA[*/
+			(function(d, s, id) {
+			  var js, fjs = d.getElementsByTagName(s)[0];
+			  if (d.getElementById(id)) return;
+			  js = d.createElement(s); js.id = id;
+			  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+			  fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));		   
+			/*]]>*/
+			</script>
+			
+			<h4>Taking Action</h4>
+			
+			<div class="panel-group" id="accordion">
+			  <div th:if="${facebookContentLink}" class="panel panel-default">
+			    <div class="panel-heading">
+			      <h4 class="panel-title">
+			        <a data-toggle="collapse" data-parent="#accordion" href="#commentOnFacebook">Facebook</a>
+			      </h4>
+			    </div>
+			    <div id="commentOnFacebook" class="panel-collapse collapse in">
+			      <div class="panel-body">
+
+				  	<p>On Facebook, you can take action by simply commenting on the post. Make sure you repeat the hashtag <i th:inline="text">[[${keyword}]]</i> exactly.</p>
+					
+					<div th:if="${facebookContentLink}"
+						 class="fb-post" 
+						 th:attr="data-href=${facebookContentLink}" data-width="500">
+					</div>
+			      
+			      </div>
+			    </div>
+			  </div>
+			  <div th:if="${twitterContentLink}" class="panel panel-default">
+			    <div class="panel-heading">
+			      <h4 class="panel-title">
+			        <a data-toggle="collapse" data-parent="#accordion" href="#replyOnTwitter">Twitter</a>
+			      </h4>
+			    </div>
+			    <div id="replyOnTwitter" th:class="${facebookContentLink} ? 'panel-collapse collapse' : 'panel-collapse collapse in'">
+			      <div class="panel-body">
+
+					<p>
+						On Twitter, you can take action by simply replying to the tweet. Make sure you mention <i th:inline="text">[[${sellerScreenname}]]</i> 
+					    and repeat the hashtag <i th:inline="text">[[${keyword}]]</i> exactly.
+					</p>
+					<p>
+						To be specific, your tweet should read:
+					</p>
+					<blockquote>
+					  <p th:inline="text">[[${sellerScreenname}]] [[${keyword}]]</p>
+					</blockquote>
+					<div th:utext="${twitterContentLink}">Embedded twitter content</div>
+
+			      </div>
+			    </div>
+			  </div>
+			</div>
+			
+			<p>Go <a href="#" th:href="@{'../' + ${listingId}}">back</a>.</p>
+			
+        </div><!--/body-fragment-->
+
+</html>

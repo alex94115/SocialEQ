@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	th:with="activePage='sale.listingHistory',
+			 isUserLoggedIn=${not #strings.containsIgnoreCase(#authentication.name, 'anonymousUser')}">
+
+	<div tiles:fragment="body">
+		<div th:if="${page.totalElements == 0 }">
+			<h2>Reply Activity</h2>
+	        <p>There are no replies yet to this listing. Please check back again soon.</p>
+		</div>
+		
+		<div th:if="${page.totalElements > 0}">
+			<h2>Reply Activity</h2>
+           	<p th:inline="text">Total number of replies: [[${page.totalElements}]]</p>
+	                 
+			<table id="replyActivity" class="table table-striped">
+				<thead>
+				  <tr>
+					<th>Source</th>
+					<th>User</th>
+					<th>Status</th>
+					<th>Natural Reply?</th>
+					<th>Contains Keyword?</th>
+				  </tr>
+				</thead>
+				
+				<tbody>
+	              <tr th:each="message : ${page.content}">
+	                <td th:text="${message.providerId}">Provider</td>
+	                <td class="username" th:text="${message.user} ? ${#strings.toLowerCase(message.user.username)} : ${message.providerUserId}">Username</td>
+	                <td class="status" th:text="${message.status}">Status</td>
+	                <td th:text="${message.isNaturalReply}">Natural Reply</td>
+	                <td th:text="${message.containsKeyword}">Contains Keyword</td>
+	              </tr>
+	            </tbody>
+				
+			</table>
+		                  
+			<div tiles:include="pagination"></div>
+		</div>
+		
+	</div>
+</html>

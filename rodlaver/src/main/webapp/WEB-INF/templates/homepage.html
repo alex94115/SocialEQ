@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org" lang="en">
+
+<head tiles:include="header" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#"></head>
+
+<body>
+
+	<span tiles:include="scripts"></span>
+
+	<!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+    
+    <div class="row" tiles:include="homepage-topnav"></div>
+    
+    <!-- Carousel -->
+	<div class="row homepage-carousel-row">
+	    <div class="col-sm-2 col-md-2 col-lg-1"></div>
+		<div class="col-xs-12 col-sm-8 col-md-8 col-lg-10">
+		  <div class="well">
+			<div id="main-carousel" class="carousel slide" data-ride="carousel">
+
+			  <!-- Wrapper for slides -->
+			  <div class="carousel-inner">
+			    <div class="item active">
+			      <img src="#" alt="Comment to Buy on Facebook"  th:src="@{/resources/images/site/socialeq-comment-to-buy.png}" />
+			    </div>
+			    <div class="item" th:if="${application.doEnableDonations}">
+			      <img src="#" alt="Comment to Donate on Facebook"  th:src="@{/resources/images/site/socialeq-comment-to-donate.png}" />
+			    </div>
+			    <div class="item">
+			      <img src="#" alt="Comment to Win on Facebook"  th:src="@{/resources/images/site/socialeq-comment-to-win.png}" />
+			    </div>
+			    <div class="item">
+			      <img src="#" alt="Comment to Buy on Twitter"  th:src="@{/resources/images/site/socialeq-tweet-to-buy.png}" />
+			    </div>
+			    <div class="item" th:if="${application.doEnableDonations}">
+			      <img src="#" alt="Comment to Donate on Twitter"  th:src="@{/resources/images/site/socialeq-tweet-to-donate.png}" />
+			    </div>
+			    <div class="item">
+			      <img src="#" alt="Comment to Win on Twitter"  th:src="@{/resources/images/site/socialeq-tweet-to-win.png}" />
+			    </div>
+
+			  </div>
+			
+			  <!-- Controls -->
+			  <a class="left carousel-control" href="#main-carousel" data-slide="prev">
+			    <span class="glyphicon glyphicon-chevron-left"></span>
+			  </a>
+			  <a class="right carousel-control" href="#main-carousel" data-slide="next">
+			    <span class="glyphicon glyphicon-chevron-right"></span>
+			  </a>
+			</div>
+		  </div>
+		</div>
+		<div class="col-sm-2 col-md-2 col-lg-1"></div>
+	</div>
+	
+	<div class="row">
+      <div class="col-xs-1 col-sm-2 col-md-2 col-lg-1"></div>
+	  <div class="col-xs-10 col-sm-6 col-md-6 col-lg-7">
+	    <h4 class="herotext">Capitalize on Your Biggest Fans</h4>  
+		<h5>
+			SocialEQ is a platform that lets you sell and run promotions on Twitter and Facebook via #hashtags.
+		</h5>
+	  </div> 
+	  <div class="col-xs-4 col-sm-2 col-md-2 col-lg-2">
+		<a class="btn herobtn" 
+		   href="#" 
+		   th:if="${#strings.containsIgnoreCase(#authentication.name, 'anonymousUser')}"
+		   th:href="${'mailto:sales@socialeq.co?subject=Sales%20Inquiry&amp;body=Hi%2C%20I%20want%20to%20get%20started%20using%20SocialEQ.%20%20Please%20contact%20me%20using%20the%20below%20information:%0A%0AName%3A%0ACompany/Charity%3A%0APhone%20Number%3A'}">
+		  Contact Us</a>
+		
+		<a th:if="${isUserLoggedIn}" 
+		   class="btn herobtn" 
+		   href="#" 
+		   th:href="@{/userHome}">Get Started</a>
+	  </div>
+	  <div class="col-xs-1 col-sm-2 col-md-2 col-lg-2"></div>  
+	</div>
+	
+	<div class="row homepage-divider">
+	  <h3 class="bannertext">You've Built a Social Audience &mdash; What's Next?</h3>
+	</div>
+	
+	<div class="row">
+		<div class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></div>
+		<div class="col-xs-10 col-sm-10 col-md-3 col-lg-3">
+			<img style="display: block; margin-left: auto; margin-right: auto; margin-top: 10px" th:src="@{/resources/images/site/PieChart.png}" />
+			<h4 style="text-align: center;">Stay In Stream</h4>
+			<p>
+				Your <strong>biggest fans</strong> are following you on Twitter and Facebook. So
+				why do links posted to your stream have such low conversion rates?
+				Two reasons: 1) users want to stay <strong>in stream</strong> and are unlikely to 
+				click on a link that takes them away from their social site, and 
+				2) most websites offer terrible user experience for users trying to 
+				complete a transaction on a <strong>mobile device</strong>.  
+			</p>
+			<p>
+				SocialEQ lets you <strong>turn followers into customers</strong> by enabling
+				in-stream transactions via #hashtags.
+			</p>
+			
+		</div>
+		
+		<div class="clearfix visible-xs visible-sm"></div>
+		<div class="col-xs-1 col-sm-1 visible-xs visible-sm"></div>
+		
+		<div class="col-xs-10 col-sm-10 col-md-3 col-lg-3">
+			<img style="display: block; margin-left: auto; margin-right: auto; margin-top: 10px"
+				th:src="@{/resources/images/site/iChart.png}" />
+			<h4 style="text-align: center;">Raise Your Profile</h4>
+			<p>
+				Want to get your <strong>#hashtag trending</strong> but don't have a limitless advertising
+				budget? SocialEQ can let your biggest fans do the work for you.
+			</p>
+			<p>
+				SocialEQ lets you <strong>choose</strong> your own #hashtag and then tie-in sales
+				and promotions like sweepstakes and giveaways. Your followers will repeat
+				your #hashtag organically and give you the <strong>social amplification</strong> 
+				effect you've been looking for.
+			</p>
+			<p>
+				SocialEQ <strong>unifies your business and marketing goals</strong> on Twitter and Facebook.
+			</p>
+		</div>
+
+		<div class="clearfix visible-xs visible-sm"></div>
+		<div class="col-xs-1 col-sm-1 visible-xs visible-sm"></div>
+		
+		<div class="col-xs-10 col-sm-10 col-md-3 col-lg-3">
+			<img style="display: block; margin-left: auto; margin-right: auto; margin-top: 10px" 
+				 th:src="@{/resources/images/site/pig.png}" />
+			<h4 style="text-align: center;">Lower Costs</h4>
+			<p>
+				SocialEQ's pricing model is simple - a small percentage of completed
+				transactions. There's no software to license, no monthly servce
+				fee, and there is no cost to create a campaign. Buyers simply register
+				an email address with us, and when a transaction happens you'll receive
+				the payment from our credit card processor immediately.
+			</p>
+			<p>
+				<strong>SocialEQ lets digital sellers make up to 35% more per sale than iTunes.</strong>
+			</p>
+		</div>
+		<div class="col-xs-1 col-sm-1 col-md-2 col-lg-2"></div>
+	</div>
+
+	<div class="band footer">
+		<div class="container" tiles:include="footer-band"></div>
+	</div>
+
+</body>
+</html>

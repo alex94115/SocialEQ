@@ -1,0 +1,1427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<!--                     -->
+	<!--   Job Definition    -->
+	<!--                     -->
+
+	<job id="rodLaverJob" restartable="false" incrementer="incrementer" xmlns="http://www.springframework.org/schema/batch">
+	
+		<listeners>
+			<listener ref="runInLoopListener" />
+		</listeners>
+
+		<!--                                        -->
+		<!--   1. Payment Status Update Changes     -->
+		<!--                                        -->
+
+		<!--  Assigns the unprocessed PAYPAL PAYMENT STATUS UPDATES into batches -->
+		<step id="divvyUpPaypalPaymentStatusUpdates" next="finalizeAbandonedLtdQtyListingPayments">
+			<tasklet ref="divvyUpPaypalPaymentStatusUpdatesTasklet"/>
+		</step>
+
+		<step id="finalizeAbandonedLtdQtyListingPayments" next="divvyUpPendingListings">
+			<tasklet>
+				<chunk reader="abandonedLtdQtyListingPaymentsReader" processor="abandonedLtdQtyListingPaymentsProcessor" writer="abandonedLtdQtyListingPaymentsItemWriter" commit-interval="1" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--                         -->
+		<!--   2. Listing Changes	 -->
+		<!--                         -->
+		
+		<!-- Find newly-created LISTINGS and assign them into a batch -->
+		<step id="divvyUpPendingListings" next="processPendingListings">
+			<tasklet ref="divvyUpPendingListingsTasklet"/>
+		</step>
+		
+		<step id="processPendingListings" next="processTwitterListingAnnouncements">
+			<tasklet>
+				<chunk reader="pendingListingReader" processor="pendingListingProcessor" writer="listingStatusItemWriter" commit-interval="1" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<step id="processTwitterListingAnnouncements" next="processFacebookListingAnnouncements">
+			<tasklet>
+				<chunk reader="listingPendingTwitterAnnouncementReader" processor="twitterListingPostingItemProcessor" writer="twitterListingStateChangeItemUpdateWriter" 
+					   commit-interval="1" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<step id="processFacebookListingAnnouncements" next="identifyCampaignsNeedingEntrantProcessing">
+			<tasklet>
+				<chunk reader="listingPendingFacebookAnnouncementReader" processor="facebookListingPostingItemProcessor" writer="facebookListingStateChangeItemUpdateWriter" 
+					   commit-interval="1" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!-- Find newly-EXPIRED and ACTIVE INSTANT GIVEAWAYS and assign them into a batch -->
+		<step id="identifyCampaignsNeedingEntrantProcessing" next="processNewlyExpiredGiveaways">
+			<tasklet ref="findCampaignsNeedingEntrantProcessingTasklet"/>
+		</step>
+		
+		<!-- Process each newly EXPIRED GIVEAWAY. Choose winners and losers and mark the campaign as CANCELED. -->
+		<step id="processNewlyExpiredGiveaways" next="processInstantWinGiveaways">
+			<tasklet>
+				<chunk reader="newlyExpiredGiveawaysReader" processor="giveawayDrawProcessor" writer="giveawayListingItemWriter" commit-interval="1" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!-- Process ACTIVE INSTANT win style GIVEAWAYs. Choose winners and losers and mark the campaign as CANCELED if it's expired. -->
+		<step id="processInstantWinGiveaways" next="cancelExpiredListings">
+			<tasklet>
+				<chunk reader="instantWinGiveawaysReader" processor="instantWinProcessor" writer="giveawayListingItemWriter" commit-interval="1" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!-- Mark non-Campaign LISTINGS whose expiry dates have passed as CANCELED. -->
+		<step id="cancelExpiredListings" next="divvyFacebookPagedCommentsToFetch">
+			<tasklet ref="markExpiredListingsAsCanceledTasklet"/>
+		</step>
+		
+
+		<!--                         -->
+		<!--   3. Messages           -->
+		<!--                         -->
+	
+		<step id="divvyFacebookPagedCommentsToFetch" next="readFacebookListingReplyMessages">
+			<tasklet ref="divvyFacebookPagedCommentsTasklet"/>
+		</step>
+	
+		<!--  Fetch any reply MESSAGES from FACEBOOK -->
+		<step id="readFacebookListingReplyMessages" next="unblockPendingRegitrationMessages">
+			<tasklet>
+				<chunk reader="facebookListingRepliesReader" processor="facebookListingRepliesProcessor" writer="replyPagingStatusUpdateItemWriter" commit-interval="1" skip-limit="100">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	            		<include class="com.projectlaver.batch.SkippableCommunicationsException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Reset now-unblocked PENDING REGISTRATION MESSAGES -->
+		<step id="unblockPendingRegitrationMessages" next="assignUserIdsToMessagesForNewRegistrants">
+			<tasklet ref="unblockPendingRegitrationMessagesTasklet"/>
+		</step>
+		
+		<!--  Assign user ids to the former PENDING REGISTRATION MESSAGES -->
+		<step id="assignUserIdsToMessagesForNewRegistrants" next="divvyUpMessages">
+			<tasklet>
+				<chunk reader="assignUserIdsToMessagesForNewRegistrantsReader" writer="assignUserIdsToMessagesForNewRegistrantsWriter" commit-interval="1" />
+			</tasklet>
+		</step>
+		
+		<!--  Separate the unprocessed MESSAGES into batches -->
+		<step id="divvyUpMessages" next="partitionProcessPaymentAttemptMessages">
+			<tasklet ref="divvyUpMessagesTasklet"/>
+		</step>
+		
+		<!--  Process the purchase attempt MESSAGES -->
+		<step id="partitionProcessPaymentAttemptMessages" next="processIrrelevantMessages">
+			<partition step="processPartitionOfPaymentAttemptMessages" partitioner="mod10partitioner">
+				<handler grid-size="10" task-executor="asyncTaskExecutor" />
+			</partition>
+		</step>
+		
+		<!--  Process the irrelevant MESSAGES -->
+		<step id="processIrrelevantMessages" next="processPendingRegistrationMessages">
+			<tasklet>
+				<chunk reader="irrelevantMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the pending registration MESSAGES -->
+		<step id="processPendingRegistrationMessages" next="processCanceledListingMessages">
+			<tasklet>
+				<chunk reader="pendingRegistrationMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the canceled listing MESSAGES -->
+		<step id="processCanceledListingMessages" next="processCompletedListingMessages">
+			<tasklet>
+				<chunk reader="canceledListingMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the completed listing MESSAGES -->
+		<step id="processCompletedListingMessages" next="processPendingMeansOfPaymentMessageMessages">
+			<tasklet>
+				<chunk reader="completedListingMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the pending means of payment MESSAGES -->
+		<step id="processPendingMeansOfPaymentMessageMessages" next="processDuplicatePurchaseAttemptMessages">
+			<tasklet>
+				<chunk reader="pendingMeansOfPaymentMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the DUPLICATE PURCHASE ATTEMPT replies  -->
+		<step id="processDuplicatePurchaseAttemptMessages" next="processDuplicateOptInAttemptMessages">
+			<tasklet>
+				<chunk reader="duplicatePurchaseAttemptMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the DUPLICATE OPT-IN ATTEMPT replies  -->
+		<step id="processDuplicateOptInAttemptMessages" next="processValidReplyActiveGiveawayMessages">
+			<tasklet>
+				<chunk reader="duplicateOptInAttemptMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the VALID OPT-IN replies to active giveaway campaign MESSAGES -->
+		<step id="processValidReplyActiveGiveawayMessages" next="processUnblockedPendingShippingAddresssMessages">
+			<tasklet>
+				<chunk reader="validRepliesActiveGiveawayMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the unblocked PENDING SHIPPING ADDRESS MESSAGES -->
+		<step id="processUnblockedPendingShippingAddresssMessages" next="unblockedPendingShipmentMessages">
+			<tasklet>
+				<chunk reader="unblockedPendingShippingAddressMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the unblocked PENDING SHIPMENT MESSAGES -->
+		<step id="unblockedPendingShipmentMessages" next="processGiveawayWinningMessages">
+			<tasklet>
+				<chunk reader="unblockedPendingShipmentMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!-- Process GIVEAWAY WINNING MESSAGES -->
+		<step id="processGiveawayWinningMessages" next="processGiveawayLosingMessages">
+			<tasklet>
+				<chunk reader="giveawayWinningMessageReader" processor="giveawayWinnerProcessor" writer="userAndPaymentCompositeItemWriter" commit-interval="1" skip-limit="10">
+					<skippable-exception-classes>
+						<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+					</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!-- Process GIVEAWAY LOSING MESSAGES -->
+		<step id="processGiveawayLosingMessages" next="processBuyerCommunications">
+			<tasklet>
+				<chunk reader="giveawayLosingMessageReader" writer="messageStatusCompositeItemWriter" commit-interval="10" skip-limit="10">
+					<skippable-exception-classes>
+						<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+					</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  Process the buyer communications MESSAGE STATE CHANGES -->
+		<step id="processBuyerCommunications" next="markMessagesStatusChangeRecordsComplete">
+			<tasklet>
+				<chunk reader="buyersCommunicationsMessageReader" processor="communicationsItemProcessor" writer="buyerMessageStateChangeItemUpdateWriter" commit-interval="10" skip-limit="100">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	            		<include class="org.springframework.social.OperationNotPermittedException"/>
+	            		<include class="com.projectlaver.batch.communication.ThrottleLimitExceededException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!--  TEMPORARILY DISABLING THIS STEP: public tweet replies don't make any sense for sellers when we get shipping addresses -->
+		<!--  Process the seller communications MESSAGE STATE CHANGES -->
+		<!-- 		<step id="processSellerCommunications" next="markMessagesStatusChangeRecordsComplete"> -->
+<!-- 			<tasklet> -->
+<!-- 				<chunk reader="sellersCommunicationsMessageReader" processor="communicationsItemProcessor" writer="sellerMessageStateChangeItemUpdateWriter" commit-interval="10" skip-limit="10"> -->
+<!-- 					<skippable-exception-classes> -->
+<!-- 	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/> -->
+<!-- 	            		<include class="org.springframework.social.OperationNotPermittedException"/> -->
+<!-- 	            		<include class="com.projectlaver.batch.communication.ThrottleLimitExceededException"/> -->
+<!-- 	         		</skippable-exception-classes> -->
+<!-- 				</chunk> -->
+<!-- 			</tasklet> -->
+<!-- 		</step> -->
+		
+		<!--  Mark records 'COMPLETED' when communications from MESSAGE STATE CHANGES are complete  -->
+		<step id="markMessagesStatusChangeRecordsComplete" next="insertUnprocessedMetricsJobs">
+			<tasklet ref="markMessagesStatusChangeRecordsCompleteTasklet"/>
+		</step>
+		
+		<!--                 -->
+		<!--   4. Metrics    -->
+		<!--                 -->
+		
+		<!-- Insert unprocessed hourly timespans into the metrics_job_execution table -->
+		<step id="insertUnprocessedMetricsJobs" next="calculateBusinessMetrics">
+			<tasklet ref="insertUnprocessedMetricsJobsTasklet" />
+		</step>
+		
+		<!-- Calculate metrics for listings with activity during the unprocessed timspan(s) -->
+		<step id="calculateBusinessMetrics" next="markProcessedMetricsJobsComplete">
+			<tasklet>
+				<chunk reader="readMetricsJobsAndListingsWithActivity" processor="metricsCalculatingProcessor" writer="businessMetricsInsertItemWriter" commit-interval="1" skip-limit="99">
+					<skippable-exception-classes>
+	            		<include class="org.springframework.dao.EmptyResultDataAccessException"/>
+	         		</skippable-exception-classes>
+				</chunk>
+			</tasklet>
+		</step>
+		
+		<!-- Mark the unprocessed hourly timespans into the metrics_job_execution table as 'COMPLETE' -->
+		<step id="markProcessedMetricsJobsComplete">
+			<tasklet ref="markProcessedMetricsJobsCompleteTasklet" />
+		</step>
+		
+	</job>
+	
+	<!--                                    -->
+	<!--   Supporting Beans' Definitions    -->
+	<!--                                    -->
+	
+	<bean id="asyncTaskExecutor" class="org.springframework.core.task.SimpleAsyncTaskExecutor" />
+	
+	<bean id="mod10partitioner" class="com.projectlaver.batch.ModTenPartitioner" />
+	
+	<step id="processPartitionOfPaymentAttemptMessages" xmlns="http://www.springframework.org/schema/batch">
+	    <tasklet>
+			<chunk reader="attemptPaymentMessageReader" processor="attemptPaymentItemProcessor" writer="paymentCompositeItemWriter" commit-interval="1" skip-limit="1000">
+				<skippable-exception-classes>
+            		<include class="com.projectlaver.util.DuplicatePurchaseAttemptException"/>
+            		<include class="com.projectlaver.util.ListingNotActiveException"/>
+<!--             		<include class="org.springframework.dao.EmptyResultDataAccessException"/> -->
+         		</skippable-exception-classes>
+			</chunk>
+		</tasklet>
+		<listeners>
+			<listener>
+				<beans:bean id="paymentWriterFailureLoggingListener" class="com.projectlaver.batch.PaymentWriteFailureLoggingListener" />
+			</listener>
+		</listeners>
+	</step>
+	
+	<!-- INCREMENTER for the Job Execution -->
+	<bean id="incrementer" class="com.projectlaver.batch.TrivialJobParametersIncrementer" />
+	
+	<!--                               -->
+	<!--        TASKLETS		       -->
+	<!--                               -->
+	
+	<!-- TASKLET that divvys up the PAYPAL PAYMENT STATUS UPDATES into batches -->
+	<bean id="divvyUpPaypalPaymentStatusUpdatesTasklet" class="com.projectlaver.batch.PaypalPaymentStatusUpdatesDivvyingTasklet" />
+	
+	<!-- TASKLET that finds newly created LISTINGS and assigns them into a batch -->
+	<bean id="divvyUpPendingListingsTasklet" class="com.projectlaver.batch.DivvyPendingListingsTasklet" />
+	
+	<!-- TASKLET that finds newly expired CAMPAIGN LISTINGS that have passed their expiry date and assigns them into a batch -->
+	<bean id="findCampaignsNeedingEntrantProcessingTasklet" class="com.projectlaver.batch.CampaignsNeedingEntrantProcessingFindingTasklet" />
+	
+	<!-- TASKLET that manages SELLING LISTINGS that are sold out, un-sold out, and expired -->
+	<bean id="markExpiredListingsAsCanceledTasklet" class="com.projectlaver.batch.ManageExpiredAndSoldOutSellingListingsTasklet" />
+	
+	<!-- TASKLET that finds Facebook listing content where we need to go fetch MESSAGES using paged comments cursors -->
+	<bean id="divvyFacebookPagedCommentsTasklet" class="com.projectlaver.batch.FacebookFetchPagedCommentDivvyingTasklet" />
+	
+	<!-- TASKLET that unblocks PENDING REGISTRATION MESSAGES where the USER has now registered -->
+	<bean id="unblockPendingRegitrationMessagesTasklet" class="com.projectlaver.batch.UnblockedPendingRegistrationMessageHandlingTasklet" />
+	
+	<!-- TASKLET that divvys up MESSAGE rows into batches -->
+	<bean id="divvyUpMessagesTasklet" class="com.projectlaver.batch.MessageDivvyingTasklet" />
+	
+	<!-- TASKLET that marks MESSAGE STATE CHANGE records complete when the neccessary communications have been sent -->
+	<bean id="markMessagesStatusChangeRecordsCompleteTasklet" class="com.projectlaver.batch.MarkMessagesStatusChangeRecordsCompleteTasklet" />
+	
+	
+	<!--                               -->
+	<!--        READERS                -->
+	<!--                               -->
+	
+	<!--  PARENT BEAN (common property definitions) of MESSAGE cursor item READER beans -->
+	<bean id="defaultReaderBean" abstract="true">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="saveState" value="false" />
+		<property name="verifyCursorPosition" value="${batch.verify.cursor.position}"/>
+	</bean>
+	
+	
+	<!--                               -->
+	<!--        LISTING READERS        -->
+	<!--                               -->
+	
+	<!--  READER for new LISTINGS that have just been created and need to be posted -->
+	<bean id="pendingListingReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="batchProcessorSuffix" value="-PENDING_LISTING"/>
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.ListingCursorItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+			   SELECT l.id l_id,
+			          l.doPostToFacebook doesRequireFacebookPosting,
+			          l.doPostToTwitter doesRequireTwitterPosting,
+			   	      lhdc.has_digital_content isDigitalGiveaway, 
+			          l.version listingVersion,
+			          (l.version + 1) newListingVersion, 
+			          (l.expires &lt; current_timestamp ) isExpired, 
+			          i.quantity quantity, 
+			          l.giveawaySeed giveawaySeed,
+			          l.batch_processor batchProcessor
+			   FROM Listings l
+			     INNER JOIN ListingHasDigitalContent lhdc ON l.id = lhdc.listing_id
+			     INNER JOIN Inventories i ON l.id = i.listing_id
+			   WHERE l.batch_processor=?
+			   ORDER BY l.created, l.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!--  READER for GIVEAWAY CAMPAIGNS that have just expired and need to be finalized -->
+	<bean id="newlyExpiredGiveawaysReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="batchProcessorSuffix" value="-NEWLY_EXPIRED_CAMPAIGN"/>
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.ListingCursorItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+			   SELECT l.id l_id, 
+			   		  false doesRequireFacebookPosting,
+			          false doesRequireTwitterPosting,
+			          lhdc.has_digital_content isDigitalGiveaway, 
+			          l.version listingVersion, 
+			          (l.version + 1) newListingVersion, 
+			          (l.expires &lt; current_timestamp ) isExpired, 
+			          i.quantity quantity, 
+			          l.giveawaySeed giveawaySeed,
+			          l.batch_processor batchProcessor
+			   FROM Listings l
+			     INNER JOIN ListingHasDigitalContent lhdc ON l.id = lhdc.listing_id
+			     INNER JOIN Inventories i ON l.id = i.listing_id
+			   WHERE l.batch_processor=?
+			   ORDER BY l.created, l.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!--  READER for ACTIVE INSTANT win style CAMPAIGNS  -->
+	<bean id="instantWinGiveawaysReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="batchProcessorSuffix" value="-INSTANT_WIN_CAMPAIGN"/>
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.ListingCursorItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+			   SELECT l.id l_id, 
+			   		  false doesRequireFacebookPosting,
+			          false doesRequireTwitterPosting,
+			          lhdc.has_digital_content isDigitalGiveaway, 
+			          l.version listingVersion, 
+			          (l.version + 1) newListingVersion, 
+			          l.expires expires, 
+			          (l.expires &lt; current_timestamp ) isExpired, 
+			          i.quantity quantity, 
+			          l.giveawaySeed giveawaySeed,
+			          l.batch_processor batchProcessor
+			   FROM Listings l
+			     INNER JOIN ListingHasDigitalContent lhdc ON l.id = lhdc.listing_id
+			     INNER JOIN Inventories i ON l.id = i.listing_id
+			   WHERE l.batch_processor=?
+			   ORDER BY l.created, l.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!--                               -->
+	<!--        MESSAGE READERS        -->
+	<!--                               -->
+	
+	<bean id="facebookListingRepliesReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="batchProcessorSuffix" value="-FACEBOOK_CHANGE_NOTIFICATION"/>
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.FetchListingRepliesItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+				SELECT 'facebook' provider_id,
+					   listing_message.twitterId listing_message_provider_id,
+					   u.facebook_page_id listing_message_container_provider_id,
+					   uc.providerUserId seller_facebook_id,
+					   uc.accessToken seller_access_token,
+					   l.keyword listing_keyword,
+					   paging_status.id paging_status_id,
+					   paging_status.max_fetched_comment_time max_fetched_comment_time,
+					   paging_status.version paging_status_version,
+					   (paging_status.version + 1) updated_paging_status_version
+				FROM Users u   
+				  INNER JOIN Listings l ON u.id = l.seller_id 
+				  INNER JOIN Messages listing_message on l.id = listing_message.listing_id 
+				  INNER JOIN ReplyPagingStatuses paging_status ON listing_message.id = paging_status.listing_message_id 
+				  INNER JOIN UserConnection uc ON u.username = uc.userId
+				WHERE paging_status.batch_processor = ?
+				  AND uc.providerId='facebook'
+		   </value>
+		</property>
+	</bean>
+	
+	<!--  PARENT BEAN (common property definitions) of MESSAGE cursor item READER beans -->
+	<bean id="defaultMessageReaderBean" abstract="true">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="saveState" value="false" />
+		<property name="verifyCursorPosition" value="${batch.verify.cursor.position}"/>
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.SimpleMessageCursorItemRowMapper"/>
+		</property>
+	</bean>
+	
+	<!-- READER for each 'IRRELEVANT' MESSAGE row (no replies are triggered) -->
+	<bean id="irrelevantMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-IRRELEVANT"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'IRRELEVANT' as new_message_status,
+			   		  FALSE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each 'PENDING REGISTRATION' MESSAGE row (causes replies to the 'buyer') -->
+	<bean id="pendingRegistrationMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-PENDING_REGISTRATION"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'PENDING_USER_REGISTRATION' as new_message_status,
+			   		  TRUE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each 'CANCELED LISTING' MESSAGE row (causes replies to the buyer and seller) -->
+	<bean id="canceledListingMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-CANCELED_LISTING"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'FAILED_INACTIVE_SALE' as new_message_status,
+			   		  TRUE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each 'COMPLETED SALE' MESSAGE row (causes replies to the buyer and seller) -->
+	<bean id="completedListingMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-COMPLETED_LISTING"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'FAILED_SOLD_OUT' as new_message_status,
+			   		  TRUE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each PENDING MEANS OF PAYMENT row (causes replies to the buyer) -->
+	<bean id="pendingMeansOfPaymentMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-PENDING_PREAPPROVAL"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'PENDING_MEANS_OF_PAYMENT' as new_message_status,
+			   		  TRUE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each DUPLICATE PURCHASE row (causes replies to the buyer) -->
+	<bean id="duplicatePurchaseAttemptMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-FAILED_DUPLICATE_PURCHASE_ATTEMPT"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'FAILED_DUPLICATE_PURCHASE' as new_message_status,
+			   		  TRUE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each DUPLICATE OPT-IN ATTEMPT row  -->
+	<bean id="duplicateOptInAttemptMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-FAILED_DUPLICATE_OPT_IN_ATTEMPT"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'FAILED_DUPLICATE_OPT_IN' as new_message_status,
+			   		  FALSE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each VALID reply to ACTIVE GIVEAWAY row -->
+	<bean id="validRepliesActiveGiveawayMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-USER_OPT_IN_ACTIVE_CAMPAIGN"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'PENDING_LISTING_EXPIRY' as new_message_status,
+			   		  FALSE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each unblocked 'PENDING SHIPPING ADDRESS' row (causes replies to the buyer and seller) -->
+	<bean id="unblockedPendingShippingAddressMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-UNBLOCKED_PENDING_SHIPPING_ADDRESS"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'PENDING_SHIPMENT' as new_message_status,
+			   		  TRUE as doesRequireBuyerCommunication, TRUE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER for each unblocked 'PENDING SHIPMENT' row (causes replies to the buyer and seller) -->
+	<bean id="unblockedPendingShipmentMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-UNBLOCKED_PENDING_SHIPMENT"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id, m.version messageVersion, (m.version + 1) newMessageVersion, m.status as prior_message_status, 'COMPLETED' as new_message_status,
+			   		  TRUE as doesRequireBuyerCommunication, FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<bean id="giveawayWinningMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="batchProcessorSuffix" value="-GIVEAWAY_WINNING_MESSAGE"/>
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.PurchaseAttemptMessageRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+				SELECT reply.id message_id,
+					   reply.status message_status,
+					   reply.version message_version,
+					   reply.user_id buyer_id,
+					   reply.providerId provider_id,
+					   reply.providerUserId provider_user_id,
+					   NULL preapproval_key,
+					   a.id a_id,
+					   a.isPrimary is_address_primary,
+					   seller.id seller_id,
+					   seller.emailAddress seller_emailAddress,
+					   seller.username seller_username,
+					   seller.voucher_logo_image_url seller_logo_image_url,
+					   seller.voucher_campaign_image_url seller_campaign_image_url,
+					   seller.merchant_name seller_merchant_name,
+					   l.id listing_id,
+					   l.title listing_title,
+					   l.keyword listing_keyword,
+					   l.longDescription listing_long_description,
+					   l.termsAndConditions listing_terms,
+					   l.type listing_type,
+					   l.goodsType goods_type,
+					   l.amount listing_amount,
+					   l.sellerRevenueRatio listing_seller_revenue_ratio,
+					   seller.do_use_chained_pmts do_use_chained_payment,
+					   i.id inventory_id,
+					   i.quantity inventory_quantity,
+					   i.remainingQuantity inventory_remaining_quantity,
+					   i.product_code inventory_product_code,
+					   i.product_description inventory_product_description
+				FROM Messages reply
+				  INNER JOIN Messages listing_message ON reply.inResponseToTwitterId = listing_message.twitterId
+				  INNER JOIN Listings l ON listing_message.listing_id = l.id
+				  INNER JOIN Inventories i ON l.id = i.listing_id
+				  INNER JOIN ListingHasDigitalContent lhdc ON l.id = lhdc.listing_id
+				  INNER JOIN Users seller ON l.seller_id = seller.id
+				  LEFT OUTER JOIN ( SELECT a.id, a.user_id, a.isPrimary FROM Addresses a WHERE a.isPrimary IS TRUE ) As a ON reply.user_id = a.user_id
+				WHERE reply.batch_processor = ?
+				  AND reply.status='PENDING_LISTING_EXPIRY'
+				ORDER BY reply.created, reply.updated
+			</value>
+		</property>
+	</bean>
+	
+	<!-- READER for each giveaway loser MESSAGE -->
+	<bean id="giveawayLosingMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultMessageReaderBean">
+		<property name="batchProcessorSuffix" value="-GIVEAWAY_LOSING_MESSAGE"/>
+		<property name="sql">
+			<value>
+			   SELECT m.id m_id,
+			   		  m.version messageVersion,
+			   		  (m.version + 1) newMessageVersion,
+			   		  m.status as prior_message_status,
+			   		  'FAILED_LOST_GIVEAWAY' as new_message_status,
+			   		  FALSE as doesRequireBuyerCommunication,
+			   		  FALSE as doesRequireSellerCommunication
+			   FROM Messages m
+			   WHERE m.batch_processor=?
+			   ORDER BY m.created, m.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER that creates a CURSOR of qualified purchase MESSAGES on which PAYMENT attempts will be made  -->
+	<bean id="attemptPaymentMessageReader" class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="batchProcessorSuffix" value="#{stepExecutionContext[suffix]}"/>
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.PurchaseAttemptMessageRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+				SELECT reply.id message_id,
+					   reply.status message_status,
+					   reply.version message_version,
+					   reply.user_id buyer_id,
+					   reply.providerId provider_id,
+					   reply.providerUserId provider_user_id,
+					   p.preapprovalKey preapproval_key,
+					   a.id a_id,
+					   a.isPrimary is_address_primary,
+					   seller.id seller_id,
+					   seller.emailAddress seller_emailAddress,
+					   seller.username seller_username,
+					   seller.voucher_logo_image_url seller_logo_image_url,
+					   seller.voucher_campaign_image_url seller_campaign_image_url,
+					   seller.merchant_name seller_merchant_name,
+					   l.id listing_id,
+					   l.title listing_title,
+					   l.longDescription listing_long_description,
+					   l.termsAndConditions listing_terms,
+					   l.keyword listing_keyword,
+					   l.type listing_type,
+					   l.goodsType goods_type,
+					   l.amount listing_amount,
+					   l.sellerRevenueRatio listing_seller_revenue_ratio,
+					   seller.do_use_chained_pmts do_use_chained_payment,
+					   i.id inventory_id,
+					   i.quantity inventory_quantity,
+					   i.remainingQuantity inventory_remaining_quantity,
+					   i.product_code inventory_product_code,
+					   i.product_description inventory_product_description
+				FROM Messages reply
+				     INNER JOIN Messages listing_message ON reply.inResponseToTwitterId = listing_message.twitterId
+					 INNER JOIN Listings l ON listing_message.listing_id = l.id
+					 INNER JOIN Inventories i ON l.id = i.listing_id
+					 INNER JOIN ListingHasDigitalContent lhdc ON l.id = lhdc.listing_id 
+					 INNER JOIN CurrentPreapprovals p ON reply.user_id = p.user_id
+					 INNER JOIN Users seller ON l.seller_id = seller.id
+					 INNER JOIN Users buyer ON reply.user_id = buyer.id
+					 LEFT OUTER JOIN ( SELECT a.id, a.user_id, a.isPrimary FROM Addresses a WHERE a.isPrimary IS TRUE ) As a ON reply.user_id = a.user_id
+				WHERE reply.batch_processor=?
+				  AND reply.status='PROCESSING'
+				ORDER BY reply.created, reply.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER that creates a CURSOR of MESSAGE STATE CHANGE rows where outbound BUYER communications are required  -->
+	<bean id="buyersCommunicationsMessageReader" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.MessageStateChangeCommunicationsCursorItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+				SELECT msc_id mscId, 
+				   msc_version mscVersion, 
+				   (msc_version + 1) newMscVersion, 
+				   msc_status mscStatus, 
+				   msc_message_id messageId, 
+				   lr.reply_content_id messageTwitterId, 
+				   msc_previous_state previousMessageState, 
+				   msc_new_state newMessageState, 
+				   'BUYER' recipientType, 
+				   lr.provider_id providerId, 
+				   lr.reply_provider_user_id toProviderUserId, /* recipient's provider user id */
+				   uc_buyer.displayName toDisplayName,      /* recipient's screen name */
+				   uc_seller.accessToken fromAccessToken, /* lister's access token */
+				   uc_seller.secret fromSecret,    /* lister's access token */
+				   '' buyerUserId, 
+				   uc_seller.userId sellerUserId, 
+				   lr.listing_id listingId, 
+				   cp.payment_id paymentId, 
+				   cp.amount totalAmount, 
+				   '' sellerAmount, 
+				   lr.seller_id sellerId, 
+				   lr.listing_type listingType, 
+				   lr.goods_type goodsType,
+				   lr.listing_locale listingLocale, 
+				   lhdc.has_digital_content hasDigitalContent,
+				   CASE WHEN trl.per_ten_seconds is NULL THEN 1 ELSE trl.per_ten_seconds END sellerMaxTweetsPerTenSec,
+				   CASE WHEN trl.per_five_minutes is NULL THEN 8 ELSE trl.per_five_minutes END sellerMaxTweetsPerFiveMin,
+				   CASE WHEN trl.per_hour is NULL THEN 99 ELSE trl.per_hour END sellerMaxTweetsPerHr,
+				   CASE WHEN trl.per_twenty_four_hours is NULL THEN 2400 ELSE trl.per_twenty_four_hours END sellerMaxTweetsPerTwentyFourHr
+				FROM ListingReplies lr
+				  JOIN 
+				  ( SELECT MIN(id) msc_id, message_id msc_message_id, version msc_version, status msc_status, previousState msc_previous_state, newState msc_new_state
+				    FROM MessageStateChanges msc
+				    WHERE msc.status='PENDING'
+				      AND msc.doesRequireBuyerCommunication != msc.areBuyerCommunicationsComplete
+				      /* EMAIL is sent by the web application */
+				      AND msc.communicationChannel != 'EMAIL' 
+				    GROUP BY message_id 
+				  ) m ON lr.reply_id = m.msc_message_id
+				  INNER JOIN UserConnection uc_seller ON ( lr.provider_id = uc_seller.providerId AND lr.seller_provider_user_id = uc_seller.providerUserId )
+				  LEFT OUTER JOIN UserConnection uc_buyer ON ( lr.provider_id = uc_buyer.providerId AND lr.reply_provider_user_id = uc_buyer.providerUserId ) 
+				  INNER JOIN ListingHasDigitalContent lhdc ON lr.listing_id = lhdc.listing_id
+				  LEFT OUTER JOIN CurrentPaymentStatus cp ON lr.reply_id = cp.message_id 
+				  LEFT OUTER JOIN SellerTweetRateLimits trl ON lr.seller_id = trl.user_id 
+				ORDER BY msc_id
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER that creates a CURSOR of MESSAGE STATE CHANGE rows where outbound SELLER communications are required  -->
+<!-- 	<bean id="sellersCommunicationsMessageReader" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step" parent="defaultReaderBean"> -->
+<!-- 		<property name="rowMapper"> -->
+<!-- 			<bean class="com.projectlaver.batch.domain.MessageStateChangeCommunicationsCursorItemRowMapper"/> -->
+<!-- 		</property> -->
+<!-- 		<property name="sql"> -->
+<!-- 			<value> -->
+<!-- 			   SELECT msc.id mscId, -->
+<!-- 			    	  msc.version mscVersion, -->
+<!-- 			    	  (msc.version + 1) newMscVersion, -->
+<!-- 			    	  msc.status mscStatus, -->
+<!-- 			    	  msc.message_id messageId, -->
+<!-- 			    	  '' messageTwitterId, -->
+<!-- 			    	  msc.previousState previousMessageState, -->
+<!-- 			    	  msc.newState newMessageState, -->
+<!-- 			    	  'SELLER' recipientType, -->
+<!-- 			    	  uc_seller.providerId providerId, -->
+<!-- 			    	  uc_seller.providerUserId toProviderUserId,	/* recipient's provider user id */ -->
+<!-- 			    	  uc_seller.accessToken fromAccessToken,		/* lister's access token */ -->
+<!-- 			    	  uc_seller.secret fromSecret,					/* lister's secret */ -->
+<!-- 			    	  uc_buyer.userId buyerUserId, -->
+<!-- 			    	  uc_seller.userId sellerUserId, -->
+<!-- 			    	  listing_message.listing_id listingId, -->
+<!-- 			    	  p.id paymentId, -->
+<!-- 			    	  '' totalAmount, -->
+<!-- 			    	  p.sellerAmount sellerAmount, -->
+<!-- 			    	  l.type listingType, -->
+<!-- 			    	  l.locale listingLocale, -->
+<!-- 			    	  ( count(cf.id) > 0 ) hasDigitalContent -->
+<!-- 			   FROM message_state_change msc -->
+<!-- 			   		 INNER JOIN message reply ON msc.message_id = reply.id -->
+<!-- 			   		 INNER JOIN message listing_message ON reply.inResponseToTwitterId = listing_message.twitterId -->
+<!-- 			   		 INNER JOIN UserConnection uc_seller ON listing_message.providerUserId = uc_seller.providerUserId -->
+<!-- 			   		 INNER JOIN UserConnection uc_buyer ON reply.providerUserId = uc_buyer.providerUserId -->
+<!-- 			   		 INNER JOIN listing l ON listing_message.listing_id = l.id -->
+<!-- 			   		 LEFT OUTER JOIN content_file cf ON l.id = cf.listing_id -->
+<!-- 			   		 LEFT OUTER JOIN payment p ON reply.id = p.message_id -->
+<!-- 			   WHERE ( msc.doesRequireSellerCommunication IS TRUE -->
+<!-- 			   		 AND msc.areSellerCommunicationsComplete IS FALSE ) -->
+<!-- 			   		 AND msc.status='PENDING' -->
+<!-- 			   		 AND listing_message.providerId = uc_seller.providerId -->
+<!-- 			   		 AND reply.providerId = uc_buyer.providerId -->
+<!-- 			   GROUP BY l.id -->
+<!-- 			   ORDER BY msc.id -->
+<!-- 		   </value> -->
+<!-- 		</property> -->
+<!-- 	</bean> -->
+	
+	<!-- READER that creates a CURSOR of MESSAGES that were formerly PENDING REGISTRATION but are now UNBLOCKED  -->
+	<bean id="assignUserIdsToMessagesForNewRegistrantsReader" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.AssignUserIdToMessageCursorItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+			  SELECT m.id message_id, u.id user_id, m.version message_version, (m.version + 1) new_message_version
+			  FROM Messages m
+			    INNER JOIN UserConnection uc ON uc.providerUserId = m.providerUserId
+			    INNER JOIN Users u ON uc.userId = u.username
+			  WHERE m.status = 'PROCESSING'
+			    AND m.user_id IS NULL
+			    AND m.providerId = uc.providerId
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- READER that creates a CURSOR of LISTING STATE CHANGE rows where we need to post to TWITTER  -->
+	<bean id="listingPendingTwitterAnnouncementReader" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.ListingStateChangeCursorItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+				SELECT lsc.id lscId,
+					   lsc.version lscVersion,
+					   (lsc.version + 1) newLscVersion,
+					   lsc.status lscStatus, 
+					   l.seller_id sellerId,
+					   l.id listingId, 
+					   l.type listingType,
+					   l.announcementPreamble announcementPreamble,
+					   l.keyword listingKeyword,
+					   l.amount listingAmount,
+					   l.locale listingLocale,
+					   l.imageFilename listingImageFilename,
+					   '' facebookPageId,
+					   '' facebookAlbumId,
+					   uc.providerId providerId,
+					   uc.rank rank,
+					   uc.providerUserId providerUserId,
+					   uc.accessToken accessToken,
+					   uc.secret destinationSecret,
+					   uc.displayName displayName
+				FROM ListingStateChanges lsc 
+				  INNER JOIN Listings l ON lsc.listing_id = l.id
+				  INNER JOIN Users u ON l.seller_id = u.id
+				  INNER JOIN 
+				  (
+				  	SELECT userId, max(rank) rank, displayName, providerId, providerUserId, accessToken, secret 
+				  	FROM UserConnection 
+				  	WHERE providerId='twitter'
+				  	GROUP BY userId
+				  ) As uc ON u.username = uc.userId
+				WHERE lsc.status='PENDING' 
+				  AND ( doesRequireTwitterPosting IS TRUE and isTwitterPostingComplete IS FALSE )
+				  AND uc.providerId='twitter'
+				ORDER BY lsc.id
+		   </value>
+		</property>
+	</bean>
+	
+	<bean id="listingPendingFacebookAnnouncementReader" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.ListingStateChangeCursorItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+				SELECT lsc.id lscId,
+					   lsc.version lscVersion,
+					   (lsc.version + 1) newLscVersion,
+					   lsc.status lscStatus, 
+					   l.seller_id sellerId,
+					   l.id listingId, 
+					   l.type listingType,
+					   l.announcementPreamble announcementPreamble,
+					   l.keyword listingKeyword,
+					   l.amount listingAmount,
+					   l.locale listingLocale,
+					   l.imageFilename listingImageFilename,
+					   u.facebook_page_id facebookPageId,
+					   u.facebook_album_id facebookAlbumId,
+					   uc.providerId providerId,
+					   uc.rank rank,
+					   uc.providerUserId providerUserId,
+					   uc.accessToken accessToken,
+					   uc.secret destinationSecret,
+					   uc.displayName displayName
+				FROM ListingStateChanges lsc 
+				  INNER JOIN Listings l ON lsc.listing_id = l.id
+				  INNER JOIN Users u ON l.seller_id = u.id
+				  INNER JOIN 
+				  (
+				  	SELECT userId, max(rank) rank, displayName, providerId, providerUserId, accessToken, secret 
+				  	FROM UserConnection 
+				  	WHERE providerId='facebook'
+				  	GROUP BY userId
+				  ) As uc ON u.username = uc.userId
+				WHERE lsc.status='PENDING' 
+				  AND ( doesRequireFacebookPosting IS TRUE and isFacebookPostingComplete IS FALSE )
+				  AND uc.providerId='facebook'
+				ORDER BY lsc.id
+		   </value>
+		</property>
+	</bean>
+	
+	<!--                                   -->
+	<!--        MESSAGE PROCESSORS	       -->
+	<!--                                   -->
+	
+	<bean id="facebookListingRepliesProcessor" class="com.projectlaver.batch.FacebookListingRepliesProcessor">
+		<property name="schema" value="${SCHEMA}" />
+	</bean>
+
+
+	<!--                                               -->
+	<!--        ABANDONED PAYMENT PROCESSORS	       -->
+	<!--                                               -->
+	
+	<bean id="abandonedLtdQtyListingPaymentsProcessor" class="com.projectlaver.batch.AbandonedLtdQtyListingPaymentsProcessor" />
+
+	<!--                                                       -->
+	<!--        MESSAGE / MESSAGE STATE CHANGE WRITERS	       -->
+	<!--                                                       -->
+	
+	<!--  PARENT (common property definition) of WRITER beans -->
+	<bean id="defaultMessageWriterBean" abstract="true">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="assertUpdates" value="true" />
+		<property name="itemSqlParameterSourceProvider">
+			<bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider" />
+		</property>
+	</bean>
+	
+	<!-- COMPOSITE WRITER for updating the MESSAGE row and inserting into the MESSAGE STATE CHANGE table -->
+	<bean id="messageStatusCompositeItemWriter" class="org.springframework.batch.item.support.CompositeItemWriter">
+		<property name="delegates">
+			<list>
+				<ref bean="messageStatusUpdateItemWriter" />
+				<ref bean="defaultMessageStateChangeInsertItemWriter" />
+			</list>
+		</property>
+	</bean>
+	
+	<!-- WRITER that UPDATES a MESSAGE's status -->
+	<bean id="messageStatusUpdateItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE Messages
+				SET status = :newMessageStatus, version = :newMessageVersion
+				WHERE id = :messageId AND version = :messageVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!-- WRITER that UPDATES a MESSAGE's status and user_id (used by giveaways where unregistered winners have a shell user created for them) -->
+	<bean id="messageUserIdAndStatusUpdateItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE Messages
+				SET user_id=:payerId, status = :newMessageStatus, version = :newMessageVersion
+				WHERE id = :messageId AND version = :messageVersion
+			</value>
+		</property>
+	</bean>
+	
+	
+	<!-- WRITER that INSERTS a MESSAGE STATE CHANGE -->
+	<bean id="defaultMessageStateChangeInsertItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter"  parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				INSERT INTO MessageStateChanges ( message_id, previousState, newState, doesRequireBuyerCommunication, areBuyerCommunicationsComplete, doesRequireSellerCommunication, areSellerCommunicationsComplete, communicationChannel, status, version )
+				VALUES ( :messageId, :priorMessageStatus, :newMessageStatus, :doesRequireBuyerCommunication, FALSE, :doesRequireSellerCommunication, FALSE, :channel, 'PENDING', 0 )
+			</value>
+		</property>
+	</bean>
+
+	<!-- WRITER that INSERTS one or more MESSAGE STATE CHANGEs -->
+	<bean id="customMessageStateChangeInsertItemWriter" class="com.projectlaver.batch.JdbcMessageStatusChangeItemWriter" parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				INSERT INTO MessageStateChanges ( message_id, previousState, newState, doesRequireBuyerCommunication, areBuyerCommunicationsComplete, doesRequireSellerCommunication, areSellerCommunicationsComplete, communicationChannel, status, version )
+ 				VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+			</value>
+		</property>
+	</bean>
+	
+	<!--  WRITER that UPDATES a MESSAGE STATE CHANGE to record whether buyer communications did complete -->
+	<bean id="buyerMessageStateChangeItemUpdateWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter"  parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE MessageStateChanges
+				SET    areBuyerCommunicationsComplete = :didCommunicationsComplete, version = :newMessageStateChangeVersion
+				WHERE  id = :messageStateChangeId AND version = :messageStateChangeVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!--  WRITER that UPDATES a MESSAGE STATE CHANGE to record whether seller communications did complete -->
+	<bean id="sellerMessageStateChangeItemUpdateWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter"  parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE MessageStateChanges
+				SET    areSellerCommunicationsComplete = :didCommunicationsComplete, version = :newMessageStateChangeVersion
+				WHERE  id = :messageStateChangeId AND version = :messageStateChangeVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!--  WRITER that UPDATES a LISTING STATE CHANGE to record whether posting the listing announcement to Twitter did complete -->
+	<bean id="twitterListingStateChangeItemUpdateWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE ListingStateChanges
+				SET isTwitterPostingComplete = :didPostingComplete, version=:newListingStateChangeVersion
+				WHERE id = :listingStateChangeId AND version = :listingStateChangeVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!--  WRITER that UPDATES a LISTING STATE CHANGE to record whether posting the listing announcement to Facebook did complete -->
+	<bean id="facebookListingStateChangeItemUpdateWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE ListingStateChanges
+				SET isFacebookPostingComplete = :didPostingComplete, version=:newListingStateChangeVersion, status=:newListingStateChangeUpdatedStatus
+				WHERE id = :listingStateChangeId AND version = :listingStateChangeVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!-- WRITER that UPDATES a MESSAGE that were formerly PENDING REGISTRATION but is now UNBLOCKED by adding the appropriate USER ID -->
+	<bean id="assignUserIdsToMessagesForNewRegistrantsWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter"  parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE Messages
+				SET    user_id = :userId, version = :newMessageVersion
+				WHERE  id = :messageId AND version = :messageVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!--                                               -->
+	<!--        LISTING PROCESSORS /  WRITERS	       -->
+	<!--                                               -->
+	
+	<bean id="pendingListingProcessor" class="com.projectlaver.batch.PendingListingProcessor" />
+	
+	<bean id="giveawayWinnerProcessor" class="com.projectlaver.batch.GiveawayWinnerItemProcessor" />
+	
+	<!-- COMPOSITE WRITER for inserting a USER (if the user is unregistered), a PAYMENT row, update an INVENTORY, updating a MESSAGE -->
+	<!-- and inserting into the MESSAGE STATE CHANGE table -->
+	<bean id="userAndPaymentCompositeItemWriter" class="org.springframework.batch.item.support.CompositeItemWriter">
+		<property name="delegates">
+			<list>
+				<ref bean="userInsertingItemWriter" />
+				<ref bean="paymentInsertingItemWriter" />
+				<ref bean="inventoryItemWriter" />
+				<ref bean="messageUserIdAndStatusUpdateItemWriter" />
+				<ref bean="customMessageStateChangeInsertItemWriter" />
+			</list>
+		</property>
+	</bean>
+	
+	<!--  WRITER that INSERTS a USER row in the case of an unregistered giveaway winner -->
+	<bean id="userInsertingItemWriter" class="com.projectlaver.batch.JdbcUserItemWriter"  parent="defaultMessageWriterBean">
+		<property name="sqlInsertUser">
+			<value>
+				INSERT INTO Users ( username, password, version )
+				VALUES ( CONCAT( ?, '/', ?), 'hootit', 0 )
+			</value>
+		</property>
+	</bean>
+	
+	<!--                                               -->
+	<!--        PAYMENT PROCESSOR /  WRITERS	       -->
+	<!--                                               -->
+	
+	<!-- PROCESSOR that will call PayPal to attempt a PAYMENT -->
+	<bean id="attemptPaymentItemProcessor" class="com.projectlaver.util.AttemptPaymentItemProcessor">
+		<property name="schema" value="${SCHEMA}" />
+	</bean>
+	
+	<!-- COMPOSITE WRITER for inserting a PAYMENT row, updating the LISTING, updating the MESSAGE -->
+	<!-- and inserting into the MESSAGE STATE CHANGE table -->
+	<bean id="paymentCompositeItemWriter" class="org.springframework.batch.item.support.CompositeItemWriter">
+		<property name="delegates">
+			<list>
+				<ref bean="paymentInsertingItemWriter" />
+				<ref bean="inventoryItemWriter" />
+				<ref bean="messageStatusUpdateItemWriter" />
+				<ref bean="customMessageStateChangeInsertItemWriter" />
+			</list>
+		</property>
+	</bean>
+	
+	<!--  WRITER that INSERTS a PAYMENT row, a child EFFECTIVE PAYMENT STATUS row, and possibly an EFFECTIVE VOUCHER STATUS row -->
+	<bean id="paymentInsertingItemWriter" class="com.projectlaver.batch.JdbcPaymentItemWriter" parent="defaultMessageWriterBean">
+		<property name="sqlInsertPayment">
+			<value>
+				INSERT INTO Payments ( payKey, correlationId, payer_id, payee_id, listing_id, inventory_id, message_id, amount, rodLaverAmount, sellerAmount, currencyCode, shippingAddress_id, quantity, version )
+				VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0 )
+			</value>
+		</property>
+		<property name="sqlInsertEffectivePaymentStatus">
+			<value>
+				INSERT INTO EffectivePaymentStatuses ( payment_id, start, end, status, version )
+				VALUES ( ?, NOW(), ?, ?, 0 )
+			</value>
+		</property>
+		<property name="sqlInsertVoucher">
+			<value>
+				INSERT INTO Vouchers ( serialNumber, salt, filename, payment_id, version )
+				VALUES ( ?, ?, ?, ?, 0 )
+			</value>
+		</property>
+		<property name="sqlInsertEffectiveVoucherStatus">
+			<value>
+				INSERT INTO EffectiveVoucherStatuses ( voucher_id, start, end, status, version )
+				VALUES ( ?, NOW(), ?, ?, 0 )
+			</value>
+		</property>
+	</bean>
+	
+	
+	<!--                                                 -->
+	<!--        ABANDONED PAYMENT READERS		         -->
+	<!--                                                 -->
+	
+	<!-- READER for PAYMENTS that have become abandoned and are related to a limited quantity listing -->
+	<bean id="abandonedLtdQtyListingPaymentsReader"  class="com.projectlaver.batch.ExecutionAwareJdbcCursorItemReader" scope="step">
+	   	<property name="dataSource" ref="dataSource"/>
+		<property name="saveState" value="false" />
+		<property name="verifyCursorPosition" value="${batch.verify.cursor.position}"/>
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.AbandonedPaymentCursorItemRowMapper"/>
+		</property>
+		<property name="batchProcessorSuffix" value="-ABANDONED_LTD_QTY_PAYMENT"/>
+		<property name="sql">
+			<value>
+			   SELECT
+			   	  p.id payment_id, 
+			   	  p.version current_payment_version, 
+			   	  p.version + 1 updated_payment_version,
+			   	  'COMPLETED' updated_payment_batch_status,
+				  p.listing_id listing_id,
+				  p.inventory_id inventory_id,
+				  p.quantity payment_quantity
+			   FROM Payments p 
+			   WHERE p.batch_processor=?
+			   ORDER BY p.created, p.updated
+		   </value>
+		</property>
+	</bean>
+	
+	<!--                                                 -->
+	<!--        ABANDONED PAYMENT WRITER		         -->
+	<!--                                                 -->
+	
+	
+	<bean id="abandonedLtdQtyListingPaymentsItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter"  parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE Payments
+				SET    batch_status = :updatedPaymentBatchStatus, version = :updatedPaymentVersion
+				WHERE  id = :paymentId AND version = :currentPaymentVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!--                               -->
+	<!--        MISCELLANEOUS	       -->
+	<!--                               -->
+
+	<!--  WRITER that UPDATES a LISTING row by changing its STATUS -->
+	<bean id="listingStatusItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE Listings
+				SET status = :newListingStatus, version=:newListingVersion, batch_processor = NULL
+				WHERE id = :listingId AND version = :listingVersion
+			</value>
+		</property>
+	</bean>
+
+	
+	<!--  WRITER that UPDATES an INVENTORY row by setting its new REMAINING QUANTITY -->
+	<bean id="inventoryItemWriter" class="com.projectlaver.batch.JdbcInventoriesItemWriter" parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE Inventories
+				SET remainingQuantity = ?, version = ?
+				WHERE id = ? AND version = ?
+			</value>
+		</property>
+	</bean>
+	
+	<!-- PROCESSOR that sends outbound communications via Twitter or Facebook -->
+	<bean id="communicationsItemProcessor" class="com.projectlaver.batch.CommunicationsItemProcessor" scope="singleton">
+		<property name="schema" value="${SCHEMA}" />
+		<property name="twitterCommunicationSender">
+			<bean class="com.projectlaver.batch.communication.TwitterCommunicationSender" />
+		</property>
+		<property name="facebookCommunicationSender">
+			<bean class="com.projectlaver.batch.communication.FacebookCommunicationSender" />
+		</property>
+	</bean>
+	
+	<!-- PROCESSOR that posts new LISTING announcements to Twitter -->
+	<bean id="twitterListingPostingItemProcessor" class="com.projectlaver.batch.TwitterListingPostingItemProcessor" scope="singleton">
+		<property name="schema" value="${SCHEMA}" />
+	</bean>
+	
+	<!-- PROCESSOR that posts new LISTING announcements to Facebook -->
+	<bean id="facebookListingPostingItemProcessor" class="com.projectlaver.batch.FacebookListingPostingItemProcessor" scope="singleton">
+		<property name="schema" value="${SCHEMA}" />
+	</bean>
+	
+	<!-- Processor that chooses winners and losers for newly-expired DRAWING-style giveaways -->
+	<bean id="giveawayDrawProcessor" class="com.projectlaver.batch.GiveawayDrawProcessor" />
+	
+	<!-- Processor that marks entrants as winners for active INSTANT-style giveaways -->
+	<bean id="instantWinProcessor" class="com.projectlaver.batch.InstantWinProcessor" />
+	
+	<!-- Writer that marks giveaways as completed after the draw has been done -->
+	<!-- Special logic here to reset the batch_processor column to null for instant-win style giveaways that aren't yet expired -->
+	<bean id="giveawayListingItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="assertUpdates" value="true" />
+		<property name="itemSqlParameterSourceProvider">
+			<bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider" />
+		</property>
+		<property name="sql">
+			<value>
+				UPDATE Listings
+				/* if the campaign is still active, as in an instant-win giveaway where we continally make entrants winners, */
+				/* then reset the batch processor column so it can be processed again in the next run of the batch job */
+				SET status = :newListingStatus, version = :newListingVersion, batch_processor = ( if( :newListingStatus = 'ACTIVE', NULL, :batchProcessor  ) ) 
+				WHERE id = :listingId AND version = :listingVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!-- WRITER that UPDATES the PAGING STATUS table with the updated paging pointer for subsequent comment retrievals  -->
+	<bean id="replyPagingStatusUpdateItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				UPDATE ReplyPagingStatuses
+				SET max_fetched_comment_time = :newMaxFetchedCommentTime, status = 'IDLE', version = :updatedPagingStatusVersion, batch_processor = NULL
+				WHERE id = :pagingStatusId AND version = :pagingStatusVersion
+			</value>
+		</property>
+	</bean>
+	
+	<!--                       -->
+	<!--        METRICS	       -->
+	<!--                       -->
+	
+	<!-- TASKLET that inserts unprocessed hourly timespans into the metrics_job_execution table -->
+	<bean id="insertUnprocessedMetricsJobsTasklet" class="com.projectlaver.batch.UnprocessedMetricsJobsTasklet" />
+	
+	<!-- READER that creates a CURSOR of listing id rows where we need to calculate business metrics  -->
+	<bean id="readMetricsJobsAndListingsWithActivity" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step" parent="defaultReaderBean">
+		<property name="rowMapper">
+			<bean class="com.projectlaver.batch.domain.BusinessMetricsCursorItemRowMapper"/>
+		</property>
+		<property name="sql">
+			<value>
+			  	SELECT DISTINCT seller_id, listing_id, metrics_id, start_time, end_time
+				FROM 
+				(
+				  SELECT p.payee_id seller_id, p.listing_id listing_id, m.id metrics_id, m.start_time start_time, m.end_time end_time
+				  FROM EffectivePaymentStatuses eps 
+				    INNER JOIN Payments p ON eps.payment_id = p.id 
+				    INNER JOIN MetricsJobExecutions m ON (eps.created &gt;=  m.start_time AND eps.created &lt; m.end_time )
+				  WHERE m.status = 'PROCESSING' 
+				    AND eps.status = 'COMPLETED'
+				  UNION
+				  SELECT l.seller_id sellerId, l.id listing_id, m.id metrics_id, m.start_time start_time, m.end_time end_time
+				  FROM Messages rm
+				    INNER JOIN Messages lm ON rm.inResponseToTwitterId = lm.twitterId
+				    INNER JOIN Listings l ON lm.listing_id = l.id
+				    INNER JOIN MetricsJobExecutions m ON (rm.created &gt;=  m.start_time AND rm.created &lt; m.end_time )
+				  WHERE m.status = 'PROCESSING' 
+				    AND lm.providerId = rm.providerId
+				) As Sub
+				ORDER BY metrics_id
+		   </value>
+		</property>
+	</bean>
+	
+	<!-- Processor that calculates business metrics for each listing and timespan -->
+	<bean id="metricsCalculatingProcessor" class="com.projectlaver.batch.MetricsCalculatingProcessor" />
+	
+	<!-- Writer that inserts a business_metrics row -->
+	<bean id="businessMetricsInsertItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter"  parent="defaultMessageWriterBean">
+		<property name="sql">
+			<value>
+				INSERT INTO BusinessMetrics( seller_id, listing_id, metrics_execution_id, responses, retweets, tw_responses, fb_responses, hashtag_responses, tw_hashtag_responses, fb_hashtag_responses, 
+				  opt_ins, tw_opt_ins, fb_opt_ins, payments, tw_payments, fb_payments, gross_sales, tw_gross_sales, fb_gross_sales, net_sales, tw_net_sales, fb_net_sales, version )
+				VALUES( :sellerId, :listingId, :metricsExecutionId, :responses, :retweets, :twitterResponses, :facebookResponses, :hashtagResponses, :twitterHashtagResponses, :facebookHashtagResponses, 
+				        :optIns, :twitterOptIns, :facebookOptIns, :payments, :twitterPayments, :facebookPayments, :grossSales, :twitterGrossSales, :facebookGrossSales, :netSales, :twitterNetSales, :facebookNetSales, 0 )
+			</value>
+		</property>
+	</bean>
+	
+	<!-- TASKLET that mark the (formerly) unprocessed hourly timespans into the metrics_job_execution table as 'COMPLETE' -->
+	<bean id="markProcessedMetricsJobsCompleteTasklet" class="com.projectlaver.batch.MarkMetricsJobsCompletedTasklet" />
+	
+	<!-- Run in Loop Listerner to repeat the job, acting as a poller -->
+	<bean id="runInLoopListener" class="com.projectlaver.batch.RunInLoopListener" /> 
+	
+</beans>

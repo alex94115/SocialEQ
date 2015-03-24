@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+	<persistence-unit name="hibernatePersistenceUnit" transaction-type="RESOURCE_LOCAL">
+	
+    	<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    	
+    	<!-- For some reason, need to list the classes since we moved them out of the web project -->
+    	<class>com.projectlaver.domain.Address</class>
+    	<class>com.projectlaver.domain.ContentFile</class>
+    	<class>com.projectlaver.domain.EffectivePaymentStatus</class>
+    	<class>com.projectlaver.domain.EffectiveVoucherStatus</class>
+    	<class>com.projectlaver.domain.Inventory</class>
+    	<class>com.projectlaver.domain.Listing</class>
+    	<class>com.projectlaver.domain.Message</class>
+    	<class>com.projectlaver.domain.MessageStateChange</class>
+    	<class>com.projectlaver.domain.Payment</class>
+    	<class>com.projectlaver.domain.Preapproval</class>
+    	<class>com.projectlaver.domain.Role</class>
+    	<class>com.projectlaver.domain.TermsOfService</class>
+    	<class>com.projectlaver.domain.User</class>
+    	<class>com.projectlaver.domain.Voucher</class>
+	
+		<properties>
+<!-- 		Toggle this setting to enable automatic DDL updates -->
+<!-- 			<property name="hibernate.hbm2ddl.auto" value="update" /> -->
+			<property name="hibernate.hbm2ddl.auto" value="none" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+			<property name="hibernate.show_sql" value="true" />
+		</properties>
+		<mapping-file>META-INF/orm.xml</mapping-file>
+	</persistence-unit>
+</persistence>

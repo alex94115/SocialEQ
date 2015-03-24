@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+
+	 <div id="registration-wrapper">
+				  
+	   <div class="row">
+	     <div class="col-sm-12">
+	       <div class="headline">
+	         <h1>Connect Your Twitter Account</h1>
+	         <h2>Once you've connected to Twitter, your fans can buy from you just by writing a Tweet.</h2>
+	       </div>
+	     </div>
+	   </div>
+	      
+	   <div class="row">
+	     <div class="col-sm-8">
+		
+		   <p>
+		     Next step is to link your Twitter account. Don't worry - if you don't have a Twitter account yet, it's free
+		     to create one and only takes a minute to set up.
+		   </p>
+		
+		   <form action="#" th:action="@{/connect/twitter}" id="connectToTwitterForm" method="post" >
+			 <fieldset>
+			   <img id="connectToTwitterImage" th:src="@{/resources/images/twitter/sign-in-with-twitter-gray.png}" />
+			 </fieldset>
+		   </form>
+		
+		   <p class="secondary-option">
+		     <a href="#" th:href="@{/registration/addSellerInfo}">I Don't Have a Twitter Account</a>
+		   </p>
+		   
+		   <div style="margin-top: 50px;">
+		     <p>
+		       Got questions? You can reach us at <a href="mailto:support@socialeq.co">support@socialeq.co</a>
+		     </p>
+		   </div>		   
+		     
+	     </div>
+	   </div>
+	 </div>
+
+
+
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+
+		    $( document ).ready(function() {
+
+				$("#connectToTwitterImage").on("click", function( event) {
+					$("#connectToTwitterForm").submit();
+				});
+				
+			});
+				
+		/*]]>*/
+		</script>
+		
+	</div>
+</html>

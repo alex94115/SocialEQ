@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org">
+
+	<div tiles:fragment="body">
+        
+        <script th:inline="javascript">
+		/*<![CDATA[*/
+		     
+		     var redirectUrl = /*[[@{'/listing/transactionDetail/' + ${paymentId} + '?status=SUCCESS'}]]*/;
+		
+		  	 if( window !== top ) {
+			 	top.location.replace( redirectUrl );
+			 } else {
+				 location.replace( redirectUrl );
+			 }
+		     
+		/*]]>*/
+		</script>
+	</div>
+</html>
