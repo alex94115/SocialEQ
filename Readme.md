@@ -71,6 +71,6 @@ There are three runtime components: a batch job, a web application, and a Twitte
 
 # Deploying
 
-1. Create the MySQL database named hootit (TODO: provide DDL script).
+1. For the database, create the MySQL database named hootit using the [DDL script](rodlaver/src/main/resources/sql/hootit-prod.sql), then create three users 'batch', 'stream', and 'hootit'. Next run the [grants script](rodlaver/src/main/resources/sql/hootit-user-grants.sql) to assign the appropriate privileges to these users.
 2. Copy the twitter stream and batch job distribution.tar.gz files to the destination environment, each in its own subdirectory. Un-tar the distribution files and make the scripts in the bin/ subdirectories executable. Run initiateStream.sh and initiateBatch.sh to start the twitter stream and batch job.
 3. Deploy the rodlaver WAR file to a Tomcat container to make the web application available.
