@@ -1,5 +1,35 @@
 # SocialEQ
 
+# Functional Overview
+
+SocialEQ is a "social transactions" system built on top of Facebook and Twitter. The core business process is that a service provider offers a good or service via a social site. Each offer is accompanied by a specific #hashtag. Users who are interested in the offer can claim it by repeating the #hashtag back to the service provider, which causes SocialEQ to facilitate the transaction. By way of an analogy, the #hashtag is like a Buy Button for a specific item and users can "click" the Buy button by using the #hashtag on a post to Facebook or Twitter.
+
+## What Types of Goods and Services can be Offered via SocialEQ? 
+
+SocialEQ supports three types of goods: 1) digital content like audio and video files, 2) physical items (that must be delivered to the recipient), and 3) stored value vouchers. Each of these goods can be offered for sale or as part of a giveaway.
+
+## How Do Buyers Initiate a Purchase / How Can a Person Enter a Giveaway?
+
+The service provider chooses whether their offer is made available on one or both of Facebook and Twitter. SocialEQ will automatically publish the offer. 
+
+### Facebook 
+On Facebook, the embodiment of an offer is a Photo within an Album having a caption that describes the offer and specifies the #hashtag. Users can initiate a transaction by repeating the #hashtag within either: 1) a comment on the Photo itself, or 2) a Post to the service provider's Facebook Page. 
+
+### Twitter
+On Twitter, the offer is a Tweet using the Product Card format that includes a preview image and summary information about the offer. Users can initiate a transaction by repeating the #hashtag within either: 1) a reply to the offer Tweet, or 2)  a Tweet that @mentions the service provider.
+
+## Payments
+
+SocialEQ allows service providers to set the price for a given good or service. After a buyer initiates a purchase by using the #hashtag, SocialEQ automatically replies with a link that brings the user into the transaction flow. SocialEQ authenticates users via OAuth and registers new users. Next, a checkout flow starts that allows a user to make a purchase using a credit or debit card. SocialEQ integrates with a payment service to effect the transactions and stores a payment "token" that can be used for subsequent payments from this user.
+
+In this way, the "next" transaction from a customer can be done frictionlessly by clearing the payment in the background without a checkout flow.
+
+## Fulfillment
+
+SocialEQ hosts digital download files, and users who have either bought or won access are presented with a secure download link on a transaction detail page. Stored voucher-style products work in a similar way; a PDF is generated and stored securely for each buyer / winner.
+
+For physical products, SocialEQ facilitates the exchange of shipping information and provides a workflow for tracking the status of items during the delivery process.
+
 # System Components
 
 There are three runtime components: a batch job, a web application, and a Twitter stream listener. These three components, plus a library of shared Java code (rodlaver-foundation), comprise the system.
